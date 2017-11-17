@@ -1,0 +1,23 @@
+.table-th {
+  font-size: 9px;
+  padding-left: .2em !important;
+  padding-right: .2em !important;
+  padding: .2em .2em;
+}
+.ui.compact.table td {
+  padding: .2em .2em;
+}
+
+.ui.compact.table th {
+  padding-left: .2em;
+  padding-right: .2em;
+}
+
+.ui.small.table {
+
+}
+
+table {
+    empty-cells: show;
+    font-size: 9px;
+}
