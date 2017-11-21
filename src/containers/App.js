@@ -148,11 +148,14 @@ class App extends React.Component {
     d.onmousemove = function(e) { //Начальные параметры
       d.onmousemove = function(e) { //Действия при смещении
         let nx = e.clientX;
-        prop = Number((w.innerWidth - nx)/w.innerWidth*100);
-        if (prop > 50) {
-          prop = 50;
-        } else if (prop < 20) {
-          prop = 20;
+        w._sb = w.innerWidth - d.body.clientWidth 
+        let wi = w.innerWidth - 20 - w._sb;
+        console.log(wi)
+        prop = Number((wi - nx)/wi*100);
+        if (prop > 90) {
+          prop = 90;
+        } else if (prop < 10) {
+          prop = 10;
         }
         app.props.setSizeBlocks(prop);
       }

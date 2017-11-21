@@ -153,14 +153,13 @@ export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // �
     w._sb = w.innerWidth - d.body.clientWidth || 0;
     let $left = d.getElementById('leftSide');
     let $right = d.getElementById('rightSide');
-    let wi = 37 + 20 + w._sb; //ширина окна - отступ справа - ширина промежутка
+    let wi = w.innerWidth - 20 - w._sb; //ширина окна - отступ справа - ширина промежутка
     //let rwi = Math.round(wi * param);
     //let lwi = wi - rwi;
-
-    let widivi = Number((37/w.innerWidth*100).toFixed(2));
-    let rwi = Number((param).toFixed(2));
+    let widivi = Number((27/wi*100).toFixed(2));
+    console.log(_sb, wi, widivi)
+    let rwi = Number(param.toFixed(2));
     let lwi = Number((100 - rwi - widivi).toFixed(2));
-    console.log(widivi, rwi, lwi, widivi + rwi + lwi)
 
     if (final) {
       dispatch(
