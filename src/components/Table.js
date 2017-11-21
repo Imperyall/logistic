@@ -52,7 +52,7 @@ class RouteTable extends React.Component {
     });
 
     return (
-      <Table size="small" very compact celled structured>
+      <Table size="small" compact="very" celled structured>
         <Table.Header>
           <Table.Row>
             {/*<Table.HeaderCell className="table-th">№</Table.HeaderCell>*/}

@@ -1,0 +1,28 @@
+#page {
+	padding: 10px;
+}
+
+#leftSide {
+	float: left;
+}
+
+#buttonDivider {
+	margin: 0 5px 0;
+	float: left;
+	position: relative;
+}
+
+#buttonDivider button {
+	position: fixed;
+	height: 50px;
+	width: 17px;
+	padding: 0;
+	margin: 300px 0 0;
+}
+#buttonDivider button:hover {
+	cursor: move;
+}
+
+#rightSide {
+	float: right;
+}

@@ -21,13 +21,15 @@ import {
   acceptRoutes,
   uploadRoutes,
   newRoutes,
-  beginLoading,
   changeDeps,
   uploadXls,
   reloadRoutes,
+  setSizeBlocks,
 } from '../actions';
 import Table from '../components/Table';
 import Overview from '../components/Overview';
+// import * as Buttons from '../constants/buttons';
+import '../main.scss';
 const { LatLngBounds } = window.google.maps;
 
 
@@ -51,13 +53,15 @@ class App extends React.Component {
       showRecycled: false,
       isLoading: true,
       useDistance: false,
+      windowSize: {},
     };
   }
 
   componentDidMount() {
     this.props.fetchDeliveryDeps(this.getFetchParams());
     this.props.fetchRoutes(this.getFetchParams());
-    this.props.beginLoading();
+    this.props.setSizeBlocks();
+    this.addEventResize();
   }
 
   componentDidUpdate(prevProps) {
@@ -71,12 +75,13 @@ class App extends React.Component {
   }
 
   getFetchParams() {
-    const { fromDate, toDate, deliveryDeps, showRecycled } = this.state;
+    const { fromDate, toDate, deliveryDeps, showRecycled, windowSize } = this.state;
     return {
       fromDate: moment(fromDate).format('DD.MM.YYYY'),
       toDate: moment(toDate).format('DD.MM.YYYY'),
       deliveryDeps: deliveryDeps.length > 0 ? deliveryDeps.join(',') : 'null',
       showRecycled: showRecycled,
+      windowSize: windowSize,
     };
   }
 
@@ -128,6 +133,39 @@ class App extends React.Component {
     window._m = map;
   }
 
+  addEventResize() {
+    window.addEventListener('overflow', () => {
+      console.log(111);
+    });
+  }
+
+  onResizeBody(/*callback*/) {
+    let app = this;
+    let d = document, w = window;
+    let prop = w._divider || 33;
+    w._divider = 0;
+    d.onmousedown = function() {return false;}
+    d.onmousemove = function(e) { //Начальные параметры
+      d.onmousemove = function(e) { //Действия при смещении
+        let nx = e.clientX;
+        prop = Number((w.innerWidth - nx)/w.innerWidth*100);
+        if (prop > 50) {
+          prop = 50;
+        } else if (prop < 20) {
+          prop = 20;
+        }
+        app.props.setSizeBlocks(prop);
+      }
+    }
+    d.onmouseup = function() {
+      app.props.setSizeBlocks(prop, true);
+      w._divider = prop;
+      //Callback если нужен
+      d.onmousedown = function() {}
+      d.onmousemove = function() {}
+    }
+  }
+
   render() {
     const { fromDate, toDate, deliveryDeps } = this.state;
     const { checkedRouteIds } = this.props;
@@ -169,8 +207,8 @@ class App extends React.Component {
     }), initialOverviewData);
 
     return (
-      <Grid padded>
-        <Grid.Column width={10}>
+      <div id="page">
+        <div id="leftSide" style={{ width: this.props.windowSize.leftWidth }}>
           {this.props.isLoading && <Loader  size="huge" active />}
           <Form size="tiny">
             <Form.Group>
@@ -182,24 +220,25 @@ class App extends React.Component {
                 width={5}
                 options={deliveryDepsOptions}
                 search
-                multiple
-              />
+                multiple />
               <Form.Input
                 placeholder="Начало периода"
                 type="date"
                 value={fromDate}
-                onChange={this.handleFromDateChange}
-              />
+                onChange={this.handleFromDateChange} />
               <Form.Input
                 placeholder="Конец периода"
                 type="date"
                 value={toDate}
-                onChange={this.handleToDateChange}
-              />
-              <Form.Checkbox id="chk1" checked={this.state.showRecycled} onChange={this.handleShowRecycled} label="Удаленные" />
-              <Form.Button color="blue" onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.fetchRoutes(this.getFetchParams());}}>
+                onChange={this.handleToDateChange} />
+              <Form.Checkbox 
+                id="chk1" 
+                checked={this.state.showRecycled} 
+                onChange={this.handleShowRecycled} 
+                label="Удаленные" />
+              <Form.Button 
+                color="blue" 
+                onClick={() => { this.props.fetchRoutes(this.getFetchParams()); }} >
                 Фильтр
               </Form.Button>
             </Form.Group>
@@ -209,98 +248,70 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance);
-                }}
-              >
+                onClick={() => { this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance); }} >
                 <Icon name="road" color="blue" />
                 Оптимизировать
               </Form.Button>
-              <Button animated="fade" basic color="green"
-                      onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.newRoutes(this.getFetchParams());
-                      }}
-              >
-                <Button.Content hidden><small>Новый</small></Button.Content>
-                <Button.Content visible><Icon name="plus" color="green"/></Button.Content>
+              <Button 
+                title="Новый"
+                basic 
+                color="green"
+                icon="plus"
+                onClick={(e) => { this.props.newRoutes(this.getFetchParams()); }} >
               </Button>
-              <Button animated="fade" basic color="green"
-                      onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.acceptRoutes(this.getFetchParams(), checkedRouteIdsArray);
-                      }}
-              >
-                <Button.Content hidden><small>Принять</small></Button.Content>
-                <Button.Content visible><Icon name="checkmark" color="green"/></Button.Content>
+              <Button 
+                title="Принять"
+                basic 
+                color="green"
+                icon="checkmark"
+                onClick={() => { this.props.acceptRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
               </Button>
-              <Button animated="fade" basic color="green"
-                      onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.reloadRoutes(this.getFetchParams(), checkedRouteIdsArray);
-                      }}
-              >
-                <Button.Content hidden>
-                  <small>Обновить</small>
-                </Button.Content>
-                <Button.Content visible><Icon name="repeat" color="green"/></Button.Content>
+              <Button 
+                title="Обновить"
+                basic 
+                color="green"
+                icon="repeat"
+                onClick={() => { this.props.reloadRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
               </Button>
-              <Button animated="fade" basic color="green"
-                      onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.addRoutes(this.getFetchParams());
-                      }}
-              >
-                <Button.Content hidden><small>Загрузить</small></Button.Content>
-                <Button.Content visible><Icon name="download" color="green"/></Button.Content>
+              <Button 
+                title="Загрузить"
+                basic 
+                color="green"
+                icon="download"
+                onClick={() => { this.props.addRoutes(this.getFetchParams()); }} >
               </Button>
-              <Button animated="fade" basic color="green"
-                      onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray);
-                      }}
-              >
-                <Button.Content hidden><small>Выгрузить</small></Button.Content>
-                <Button.Content visible><Icon name="upload" color="green"/></Button.Content>
+              <Button 
+                title="Выгрузить"
+                basic 
+                color="green"
+                icon="upload"
+                onClick={() => { this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
               </Button>
-              <Button animated="fade" basic color="red"
-                      onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.recycleRoutes(this.getFetchParams(), checkedRouteIdsArray);
-                      }}
-              >
-                <Button.Content hidden><small>Удалить</small></Button.Content>
-                <Button.Content visible><Icon name="trash" color="red"/></Button.Content>
+              <Button 
+                title="Удалить"
+                basic 
+                color="red"
+                icon="trash"
+                onClick={() => { this.props.recycleRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
               </Button>
-              <Button animated="fade" basic color="red"
-                      onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray);
-                      }}
-              >
-                <Button.Content hidden><small>Вернуть</small></Button.Content>
-                <Button.Content visible><Icon name="recycle" color="red"/></Button.Content>
+              <Button 
+                title="Вернуть"
+                basic 
+                color="red"
+                icon="recycle"
+                onClick={() => { this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
               </Button>
               <Form.Button
                 basic
                 color="yellow"
-                onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.changeDeps(this.getFetchParams(), deliveryDeps, checkedRouteIdsArray);
-                }}
-              >
+                onClick={() => { this.props.changeDeps(this.getFetchParams(), deliveryDeps, checkedRouteIdsArray); }} >
                 <Icon name="home" color="yellow" />
                 Сменить базу
               </Form.Button>
               <Form.Button
                 basic
                 color="green"
-                onClick={() => {
-                        this.props.beginLoading(true);
-                        this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray);
-                }}
-              >
+                onClick={() => { this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray); }} >
                 <Icon name="table" color="green" />
                 Выгрузить отчет
               </Form.Button>
@@ -309,11 +320,7 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => {
-                  this.props.beginLoading(true);
-                  this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one');
-                }}
-              >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one'); }} >
                 <Icon name="truck" color="blue"/>
                 <Icon name="truck" color="blue" inverted/>
                 Закрепленные ТС
@@ -321,11 +328,7 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => {
-                  this.props.beginLoading(true);
-                  this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one');
-                }}
-              >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one'); }} >
                 <Icon name="truck" color="blue"/>
                 <Icon name="plus" color="blue"/>
                 <Icon name="truck" color="blue" inverted/>
@@ -334,26 +337,23 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => {
-                  this.props.beginLoading(true);
-                  this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one');
-                }}
-              >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one'); }} >
                 <Icon name="truck" color="blue" inverted/>
                 Виртуальные ТС
               </Form.Button>
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => {
-                  this.props.beginLoading(true);
-                  this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase');
-                }}
-              >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase'); }} >
                 <Icon name="home" color="blue" inverted/>
                 Без баз
               </Form.Button>
-              <Form.Checkbox slider id="chk2" checked={this.state.useDistance} onChange={this.handleUseDistance} label="время/км" />
+              <Form.Checkbox 
+                slider 
+                id="chk2" 
+                checked={this.state.useDistance} 
+                onChange={this.handleUseDistance} 
+                label="время/км" />
             </Form.Group>
           </Form>
           <Table
@@ -367,14 +367,19 @@ class App extends React.Component {
             setActiveRoute={this.props.setActiveRoute}
             setActiveWaypoint={this.props.setActiveWaypoint}
             activeRouteId={this.props.activeRouteId}
-            activeWaypointId={this.props.activeWaypointId}
-          />
-        </Grid.Column>
-        <Grid.Column width={6}>
-          <div style={{width: "36%",position:"fixed"}}>
+            activeWaypointId={this.props.activeWaypointId} />
+        </div>
+        <div id="buttonDivider">
+          <Button 
+            title="Изменить размер"
+            icon="resize horizontal"
+            onMouseDown={() => this.onResizeBody()} >
+          </Button>
+        </div>
+        <div id="rightSide" style={{ width: this.props.windowSize.rightWidth, position:"fixed", right: 10 }}>
           <GoogleMap
-            containerElement={<div style={{ height: `60vh` }} />}
-            mapElement={<div style={{ height: `60vh` }} />}
+            containerElement={<div style={{ height: "60vh" }} />}
+            mapElement={<div style={{ height: "60vh" }} />}
             routes={this.props.routes}
             onMapLoad={this.handleMapLoad}
             center={this.props.center}
@@ -382,12 +387,10 @@ class App extends React.Component {
             markerIcon={this.props.markerIcon}
             activeWaypointId={this.props.activeWaypointId}
             setActiveWaypoint={this.props.setActiveWaypoint}
-            checkedRouteIds={this.props.checkedRouteIds}
-          />
+            checkedRouteIds={this.props.checkedRouteIds} />
           <Overview data={overviewData} />
-          </div>
-        </Grid.Column>
-      </Grid>
+        </div>
+      </div>
     );
   }
 }
@@ -402,6 +405,7 @@ const mapStateToProps = (state) => ({
   bounds: state.get('bounds'),
   center: state.get('center').toJS(),
   isLoading: state.get('isLoading'),
+  windowSize: state.get('windowSize'),
 });
 
 const mapDispatchToProps = {
@@ -421,10 +425,10 @@ const mapDispatchToProps = {
   acceptRoutes,
   uploadRoutes,
   newRoutes,
-  beginLoading,
   changeDeps,
   uploadXls,
   reloadRoutes,
+  setSizeBlocks,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

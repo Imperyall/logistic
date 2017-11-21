@@ -8,14 +8,20 @@ import {
   SET_ACTIVE_ROUTE,
   SET_ACTIVE_WAYPOINT,
   BEGIN_LOADING,
+  CHANGE_BLOCKS_SIZE,
 } from '../constants/actionTypes';
 import BASE_URL from '../constants/baseURL';
 
-
 export const fetchRoutes = (params) => (dispatch) => {
+  dispatch(beginLoading(true));
   return axios.get(`${BASE_URL}/routes/get/`, { params })
     .then((res) => {
-      dispatch({ type: FETCH_ROUTES_SUCCESS, payload: res.data });
+      dispatch({ 
+        type: FETCH_ROUTES_SUCCESS, 
+        payload: res.data 
+      });
+    }).then(() => {
+      dispatch(setSizeBlocks());
     });
 };
 
@@ -110,7 +116,6 @@ export const changeDeps = (fetchParams,deliveryDeps, pk) => (dispatch) => {
     });
 };
 
-
 export const moveWaypoint = (newStateRoutes) => (
   { type: MOVE_WAYPOINT, payload: newStateRoutes }
 );
@@ -137,3 +142,37 @@ export const beginLoading = (isLoading) => {
   };
 };
 
+export const setNewBlocksSize = (data) => (
+  { type: CHANGE_BLOCKS_SIZE, payload: data }
+);
+
+export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // Функция пересчета размера элементов
+  let w = window, d = document;
+  if (param != w._divider) {
+    param = w._divider || param;
+    w._sb = w.innerWidth - d.body.clientWidth || 0;
+    let $left = d.getElementById('leftSide');
+    let $right = d.getElementById('rightSide');
+    let wi = 37 + 20 + w._sb; //ширина окна - отступ справа - ширина промежутка
+    //let rwi = Math.round(wi * param);
+    //let lwi = wi - rwi;
+
+    let widivi = Number((37/w.innerWidth*100).toFixed(2));
+    let rwi = Number((param).toFixed(2));
+    let lwi = Number((100 - rwi - widivi).toFixed(2));
+    console.log(widivi, rwi, lwi, widivi + rwi + lwi)
+
+    if (final) {
+      dispatch(
+        setNewBlocksSize({
+          'leftWidth': lwi + '%',
+          'rightWidth': rwi + '%',
+        })
+      );
+      window.google.maps.event.trigger(window._m.context['__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'], 'resize'); //перестроение размера окна
+    } else {
+      $left.style.width = lwi + '%';
+      $right.style.width = rwi + '%';
+    }
+  }
+};

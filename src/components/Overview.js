@@ -4,7 +4,7 @@ import { pprintSeconds } from '../utils';
 
 
 const Overview = ({ data }) => (
-  <Table size="small" compact="very" striped attached={top}>
+  <Table size="small" compact="very" striped attached="top">
     <Table.Body>
       <Table.Row>
         <Table.Cell>Общее расстояние</Table.Cell>
