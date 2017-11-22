@@ -153,13 +153,12 @@ export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // �
     w._sb = w.innerWidth - d.body.clientWidth || 0;
     let $left = d.getElementById('leftSide');
     let $right = d.getElementById('rightSide');
-    let wi = w.innerWidth - 20 - w._sb; //ширина окна - отступ справа - ширина промежутка
-    //let rwi = Math.round(wi * param);
-    //let lwi = wi - rwi;
-    let widivi = Number((27/wi*100).toFixed(2));
-    console.log(_sb, wi, widivi)
-    let rwi = Number(param.toFixed(2));
-    let lwi = Number((100 - rwi - widivi).toFixed(2));
+    let padding = 20, divid = 27; //Отступы по краям, ширина кнопки раздлелителя с отступами
+    let wi = w.innerWidth - padding; //ширина окна, отступ по краям
+    let widivi = divid/wi*100; //Ширина разделителя в процентах
+    let pp = padding/wi*100; //Padding percent
+    let rwi = Number((param - pp).toFixed(2));
+    let lwi = Number((100 - param - widivi).toFixed(2));
 
     if (final) {
       dispatch(

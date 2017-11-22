@@ -150,12 +150,11 @@ class App extends React.Component {
         let nx = e.clientX;
         w._sb = w.innerWidth - d.body.clientWidth 
         let wi = w.innerWidth - 20 - w._sb;
-        console.log(wi)
         prop = Number((wi - nx)/wi*100);
-        if (prop > 90) {
-          prop = 90;
-        } else if (prop < 10) {
-          prop = 10;
+        if (prop > 50) {
+          prop = 50;
+        } else if (prop < 20) {
+          prop = 20;
         }
         app.props.setSizeBlocks(prop);
       }
@@ -379,19 +378,21 @@ class App extends React.Component {
             onMouseDown={() => this.onResizeBody()} >
           </Button>
         </div>
-        <div id="rightSide" style={{ width: this.props.windowSize.rightWidth, position:"fixed", right: 10 }}>
-          <GoogleMap
-            containerElement={<div style={{ height: "60vh" }} />}
-            mapElement={<div style={{ height: "60vh" }} />}
-            routes={this.props.routes}
-            onMapLoad={this.handleMapLoad}
-            center={this.props.center}
-            markerPosition={this.props.markerPosition}
-            markerIcon={this.props.markerIcon}
-            activeWaypointId={this.props.activeWaypointId}
-            setActiveWaypoint={this.props.setActiveWaypoint}
-            checkedRouteIds={this.props.checkedRouteIds} />
-          <Overview data={overviewData} />
+        <div id="rightSide" style={{ width: this.props.windowSize.rightWidth }}>
+          <div style={{width: "inherit", position: "fixed", right: "10px"}}>
+            <GoogleMap
+              containerElement={<div style={{ height: "60vh" }} />}
+              mapElement={<div style={{ height: "60vh" }} />}
+              routes={this.props.routes}
+              onMapLoad={this.handleMapLoad}
+              center={this.props.center}
+              markerPosition={this.props.markerPosition}
+              markerIcon={this.props.markerIcon}
+              activeWaypointId={this.props.activeWaypointId}
+              setActiveWaypoint={this.props.setActiveWaypoint}
+              checkedRouteIds={this.props.checkedRouteIds} />
+            <Overview data={overviewData} />
+          </div>
         </div>
       </div>
     );
