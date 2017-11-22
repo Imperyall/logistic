@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid, Form, Icon, Button, Loader } from 'semantic-ui-react';
+import { Form, Icon, Button, Loader } from 'semantic-ui-react';
 import GoogleMap from '../components/GoogleMap';
 import moment from 'moment';
 import {
@@ -45,6 +45,7 @@ class App extends React.Component {
     this.getFetchParams = this.getFetchParams.bind(this);
     this.handleMapLoad = this.handleMapLoad.bind(this);
     this.handleUseDistance = this.handleUseDistance.bind(this);
+    this.handleSecondRaces = this.handleSecondRaces.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
@@ -53,6 +54,7 @@ class App extends React.Component {
       showRecycled: false,
       isLoading: true,
       useDistance: false,
+      secondRaces: false,
       windowSize: {},
     };
   }
@@ -61,7 +63,6 @@ class App extends React.Component {
     this.props.fetchDeliveryDeps(this.getFetchParams());
     this.props.fetchRoutes(this.getFetchParams());
     this.props.setSizeBlocks();
-    this.addEventResize();
   }
 
   componentDidUpdate(prevProps) {
@@ -75,13 +76,12 @@ class App extends React.Component {
   }
 
   getFetchParams() {
-    const { fromDate, toDate, deliveryDeps, showRecycled, windowSize } = this.state;
+    const { fromDate, toDate, deliveryDeps, showRecycled } = this.state;
     return {
       fromDate: moment(fromDate).format('DD.MM.YYYY'),
       toDate: moment(toDate).format('DD.MM.YYYY'),
       deliveryDeps: deliveryDeps.length > 0 ? deliveryDeps.join(',') : 'null',
       showRecycled: showRecycled,
-      windowSize: windowSize,
     };
   }
 
@@ -105,7 +105,11 @@ class App extends React.Component {
     this.setState({ useDistance: !this.state.useDistance});
   }
 
- handleMoveWaypoint(dragIndex, hoverIndex) {
+  handleSecondRaces() {
+    this.setState({ secondRaces: !this.state.secondRaces});
+  }
+
+  handleMoveWaypoint(dragIndex, hoverIndex) {
     const newRoutes = [...this.props.routes];
 
     const dragWaypoint = newRoutes[dragIndex.routeIndex].waypoints[dragIndex.waypointIndex];
@@ -133,22 +137,16 @@ class App extends React.Component {
     window._m = map;
   }
 
-  addEventResize() {
-    window.addEventListener('overflow', () => {
-      console.log(111);
-    });
-  }
-
   onResizeBody(/*callback*/) {
     let app = this;
     let d = document, w = window;
     let prop = w._divider || 33;
     w._divider = 0;
-    d.onmousedown = function() {return false;}
-    d.onmousemove = function(e) { //Начальные параметры
-      d.onmousemove = function(e) { //Действия при смещении
+    d.onmousedown = () => { return false; };
+    d.onmousemove = () => { //Начальные параметры
+      d.onmousemove = (e) => { //Действия при смещении
         let nx = e.clientX;
-        w._sb = w.innerWidth - d.body.clientWidth 
+        w._sb = w.innerWidth - d.body.clientWidth;
         let wi = w.innerWidth - 20 - w._sb;
         prop = Number((wi - nx)/wi*100);
         if (prop > 50) {
@@ -157,15 +155,15 @@ class App extends React.Component {
           prop = 20;
         }
         app.props.setSizeBlocks(prop);
-      }
-    }
-    d.onmouseup = function() {
+      };
+    };
+    d.onmouseup = () => {
       app.props.setSizeBlocks(prop, true);
       w._divider = prop;
       //Callback если нужен
-      d.onmousedown = function() {}
-      d.onmousemove = function() {}
-    }
+      d.onmousedown = () => {};
+      d.onmousemove = () => {};
+    };
   }
 
   render() {
@@ -259,7 +257,7 @@ class App extends React.Component {
                 basic 
                 color="green"
                 icon="plus"
-                onClick={(e) => { this.props.newRoutes(this.getFetchParams()); }} >
+                onClick={() => { this.props.newRoutes(this.getFetchParams()); }} >
               </Button>
               <Button 
                 title="Принять"
@@ -322,7 +320,7 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one'); }} >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one', this.state.secondRaces); }} >
                 <Icon name="truck" color="blue"/>
                 <Icon name="truck" color="blue" inverted/>
                 Закрепленные ТС
@@ -330,7 +328,7 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one'); }} >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one', this.state.secondRaces); }} >
                 <Icon name="truck" color="blue"/>
                 <Icon name="plus" color="blue"/>
                 <Icon name="truck" color="blue" inverted/>
@@ -339,14 +337,14 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one'); }} >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one', this.state.secondRaces); }} >
                 <Icon name="truck" color="blue" inverted/>
                 Виртуальные ТС
               </Form.Button>
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase'); }} >
+                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase', this.state.secondRaces); }} >
                 <Icon name="home" color="blue" inverted/>
                 Без баз
               </Form.Button>
@@ -356,6 +354,12 @@ class App extends React.Component {
                 checked={this.state.useDistance} 
                 onChange={this.handleUseDistance} 
                 label="время/км" />
+              <Form.Checkbox 
+                slider 
+                id="chk3" 
+                checked={this.state.secondRaces} 
+                onChange={this.handleSecondRaces} 
+                label="Повторный выезд" />
             </Form.Group>
           </Form>
           <Table

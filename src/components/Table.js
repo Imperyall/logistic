@@ -12,6 +12,7 @@ class RouteTable extends React.Component {
     const routeTables = this.props.routes.map((route, index) => {
       let rows = [
         <RouteRow
+          key={index}
           route={route}
           routeIndex={index}
           onClick={() => {
