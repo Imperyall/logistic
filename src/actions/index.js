@@ -39,8 +39,8 @@ export const optimizeRoutes = (fetchParams, pk, useDistance) => (dispatch) => {
     });
 };
 
-export const optimizeAllRoutes = (fetchParams, pk, opts, useDistance, bases) => (dispatch) => {
-  return axios.get(`${BASE_URL}/routes/all/`, { params: { pk, opts, useDistance, bases } })
+export const optimizeAllRoutes = (fetchParams, pk, opts, useDistance, bases, secondRaces) => (dispatch) => {
+  return axios.get(`${BASE_URL}/routes/all/`, { params: { pk, opts, useDistance, bases, secondRaces } })
     .then(() => {
       dispatch(fetchRoutes(fetchParams));
     });
