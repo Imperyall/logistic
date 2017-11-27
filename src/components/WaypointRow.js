@@ -1,6 +1,6 @@
 import React from 'react';
 // import { Table, Popup, Icon } from 'semantic-ui-react';
-import { Table } from 'semantic-ui-react';
+import { Table, Icon } from 'semantic-ui-react';
 import { DragSource, DropTarget } from 'react-dnd';
 import * as dragTypes from '../constants/dragTypes';
 import { pprintSeconds } from '../utils';
@@ -67,7 +67,7 @@ class Waypoint extends React.Component {
     return connectDragSource(connectDropTarget(
       <tr style={style} onClick={this.props.onClick}>
         <Table.Cell><small>{waypoint.num}</small></Table.Cell>
-        <Table.Cell><small>{waypoint.id1}</small></Table.Cell>
+        <Table.Cell>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small></Table.Cell>
         <Table.Cell><small>{waypoint.title}</small></Table.Cell>
         <Table.Cell><small>{waypoint.deliveryDep}</small></Table.Cell>
         <Table.Cell colSpan="3"><small>{waypoint.address}</small></Table.Cell>
