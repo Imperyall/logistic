@@ -26,12 +26,7 @@ const initialState = fromJS({
   isLoading: false,
   center: Map({ lat: 45.0392651, lng: 39.0817043 }),
   windowSize: {},
-  modalData: {
-    open: false,
-    title: '',
-    id: 0,
-    text: '',
-  },
+  modalData: {},
 });
 
 

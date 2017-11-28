@@ -78,7 +78,7 @@ class Waypoint extends React.Component {
         <Table.Cell onClick={this.props.onClick}><small>{(waypoint.distance / 1000).toFixed()} ({waypoint.distance>0 && ((waypoint.distance / waypoint.duration)*3.6).toFixed()} км/ч)</small></Table.Cell>
         <Table.Cell onClick={this.props.onClick}><small>{`${waypoint.deliveryTimeS} - ${waypoint.deliveryTimeE}`}</small></Table.Cell>
         <Table.Cell onClick={this.props.onClick}><small>{pprintSeconds(+waypoint.serviceTime)} ({`${waypoint.plannedTimeS} - ${waypoint.plannedTimeE}`})</small></Table.Cell>
-        <Table.Cell onClick={() => this.props.modalShow({ open: true, id: waypoint.id, text: waypoint.comment })} style={{cursor: 'pointer'}} textAlign="center">
+        <Table.Cell onClick={() => this.props.modalShow({ open: true, id: waypoint.id, id1: waypoint.id1, text: waypoint.comment })} style={{cursor: 'pointer'}} textAlign="center">
           <Icon name="edit" color={waypoint.comment ? 'green' : 'black'} title={waypoint.comment ? waypoint.comment : 'Добавить комментарий'} />
           {/*<Popup*/}
             {/*trigger={*/}

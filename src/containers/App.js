@@ -119,7 +119,7 @@ class App extends React.Component {
     this.setState({modalData: { open: !this.state.modalData.open}});
   }
 
-  modalShow({ open, id, text }) {
+  modalShow({ open, id, text, id1 }) {
     if (!open && id) {
       this.props.saveComment(this.getFetchParams(), { id, text });
     }
@@ -128,6 +128,7 @@ class App extends React.Component {
         open: open,
         id: id,
         text: text,
+        id1: id1,
       }
     });
   }
