@@ -9,6 +9,7 @@ import {
   SET_ACTIVE_WAYPOINT,
   BEGIN_LOADING,
   CHANGE_BLOCKS_SIZE,
+  SAVE_COMMENT,
 } from '../constants/actionTypes';
 import BASE_URL from '../constants/baseURL';
 
@@ -173,4 +174,11 @@ export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // Ð
       $right.style.width = rwi + '%';
     }
   }
+};
+
+export const saveComment = (fetchParams, { id, text }) => (dispatch) => {
+  return axios.get(`${BASE_URL}/index/save/`, { params: { id, comment: text } })
+    .then(() => {
+      dispatch(fetchRoutes(fetchParams));
+    });
 };

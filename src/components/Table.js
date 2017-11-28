@@ -39,6 +39,7 @@ class RouteTable extends React.Component {
                 index={{ routeIndex: index, waypointIndex: index2 }}
                 previewMoveWaypoint={this.props.previewMoveWaypoint}
                 endMoveWaypoint={this.props.endMoveWaypoint}
+                modalShow={this.props.modalShow}
                 onClick={() => {
                   this.props.setActiveWaypoint(index, index2, !(waypoint.id === this.props.activeWaypointId));
                 }}

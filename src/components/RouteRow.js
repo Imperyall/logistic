@@ -90,7 +90,7 @@ const RouteRow = (props) => {
       <Th><small>Километраж {(route.distance / 1000).toFixed()} км</small></Th>
       <Th><small>Время в ТТ: {pprintSeconds(+route.serviceTimeAll)}</small></Th>
       <Th><small>Общее время: {pprintSeconds(+route.duration)} ({route.plannedTimeS} - {route.plannedTimeE})</small></Th>
-      <Th collapsing>
+      <Th textAlign="center" collapsing>
         <Icon
           name="list"
           style={{ cursor: 'pointer', color:`${route.color}` }}

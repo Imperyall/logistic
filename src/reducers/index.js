@@ -11,6 +11,7 @@ import {
   SET_ACTIVE_WAYPOINT,
   BEGIN_LOADING,
   CHANGE_BLOCKS_SIZE,
+  SAVE_COMMENT,
 } from '../constants/actionTypes';
 
 const initialState = fromJS({
@@ -25,6 +26,12 @@ const initialState = fromJS({
   isLoading: false,
   center: Map({ lat: 45.0392651, lng: 39.0817043 }),
   windowSize: {},
+  modalData: {
+    open: false,
+    title: '',
+    id: 0,
+    text: '',
+  },
 });
 
 
@@ -116,6 +123,8 @@ export default function rootReducer(state = initialState, action) {
       return state.set('isLoading', action.payload);
     case CHANGE_BLOCKS_SIZE:
       return state.set('windowSize', action.payload);
+    case SAVE_COMMENT:
+      return state.set('modalData', action.payload);
     default:
       return state;
   }

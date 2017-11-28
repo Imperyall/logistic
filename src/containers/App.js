@@ -25,11 +25,14 @@ import {
   uploadXls,
   reloadRoutes,
   setSizeBlocks,
+  saveComment,
 } from '../actions';
 import Table from '../components/Table';
 import Overview from '../components/Overview';
 // import * as Buttons from '../constants/buttons';
 import '../main.scss';
+import ModalExtend from '../components/ModalExtend';
+
 const { LatLngBounds } = window.google.maps;
 
 
@@ -46,6 +49,8 @@ class App extends React.Component {
     this.handleMapLoad = this.handleMapLoad.bind(this);
     this.handleUseDistance = this.handleUseDistance.bind(this);
     this.handleSecondRaces = this.handleSecondRaces.bind(this);
+    this.handleModalShow = this.handleModalShow.bind(this);
+    this.modalShow = this.modalShow.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
@@ -56,6 +61,7 @@ class App extends React.Component {
       useDistance: false,
       secondRaces: false,
       windowSize: {},
+      modalData: {},
     };
   }
 
@@ -107,6 +113,23 @@ class App extends React.Component {
 
   handleSecondRaces() {
     this.setState({ secondRaces: !this.state.secondRaces});
+  }
+
+  handleModalShow() {
+    this.setState({modalData: { open: !this.state.modalData.open}});
+  }
+
+  modalShow({ open, id, text }) {
+    if (!open && id) {
+      this.props.saveComment(this.getFetchParams(), { id, text });
+    }
+    this.setState({
+      modalData: { 
+        open: open,
+        id: id,
+        text: text,
+      }
+    });
   }
 
   handleMoveWaypoint(dragIndex, hoverIndex) {
@@ -209,7 +232,7 @@ class App extends React.Component {
     return (
       <div id="page">
         <div id="leftSide" style={{ width: this.props.windowSize.leftWidth }}>
-          {this.props.isLoading && <Loader  size="huge" active />}
+          {this.props.isLoading && <Loader size="huge" active />}
           <Form size="tiny">
             <Form.Group>
               <Form.Select
@@ -238,7 +261,7 @@ class App extends React.Component {
                 label="Удаленные" />
               <Form.Button 
                 color="blue" 
-                onClick={() => { this.props.fetchRoutes(this.getFetchParams()); }} >
+                onClick={() => this.props.fetchRoutes(this.getFetchParams())} >
                 Фильтр
               </Form.Button>
             </Form.Group>
@@ -248,7 +271,7 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance); }} >
+                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance)} >
                 <Icon name="road" color="blue" />
                 Оптимизировать
               </Form.Button>
@@ -257,61 +280,61 @@ class App extends React.Component {
                 basic 
                 color="green"
                 icon="plus"
-                onClick={() => { this.props.newRoutes(this.getFetchParams()); }} >
+                onClick={() => this.props.newRoutes(this.getFetchParams())} >
               </Button>
               <Button 
                 title="Принять"
                 basic 
                 color="green"
                 icon="checkmark"
-                onClick={() => { this.props.acceptRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
+                onClick={() => this.props.acceptRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
               </Button>
               <Button 
                 title="Обновить"
                 basic 
                 color="green"
                 icon="repeat"
-                onClick={() => { this.props.reloadRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
+                onClick={() => this.props.reloadRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
               </Button>
               <Button 
                 title="Загрузить"
                 basic 
                 color="green"
                 icon="download"
-                onClick={() => { this.props.addRoutes(this.getFetchParams()); }} >
+                onClick={() => this.props.addRoutes(this.getFetchParams())} >
               </Button>
               <Button 
                 title="Выгрузить"
                 basic 
                 color="green"
                 icon="upload"
-                onClick={() => { this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
+                onClick={() => this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
               </Button>
               <Button 
                 title="Удалить"
                 basic 
                 color="red"
                 icon="trash"
-                onClick={() => { this.props.recycleRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
+                onClick={() => this.props.recycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
               </Button>
               <Button 
                 title="Вернуть"
                 basic 
                 color="red"
                 icon="recycle"
-                onClick={() => { this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray); }} >
+                onClick={() => this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
               </Button>
               <Form.Button
                 basic
                 color="yellow"
-                onClick={() => { this.props.changeDeps(this.getFetchParams(), deliveryDeps, checkedRouteIdsArray); }} >
+                onClick={() => this.props.changeDeps(this.getFetchParams(), deliveryDeps, checkedRouteIdsArray)} >
                 <Icon name="home" color="yellow" />
                 Сменить базу
               </Form.Button>
               <Form.Button
                 basic
                 color="green"
-                onClick={() => { this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray); }} >
+                onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} >
                 <Icon name="table" color="green" />
                 Выгрузить отчет
               </Form.Button>
@@ -320,7 +343,7 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one', this.state.secondRaces); }} >
+                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one', this.state.secondRaces)} >
                 <Icon name="truck" color="blue"/>
                 <Icon name="truck" color="blue" inverted/>
                 Закрепленные ТС
@@ -328,7 +351,7 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one', this.state.secondRaces); }} >
+                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one', this.state.secondRaces)} >
                 <Icon name="truck" color="blue"/>
                 <Icon name="plus" color="blue"/>
                 <Icon name="truck" color="blue" inverted/>
@@ -337,14 +360,14 @@ class App extends React.Component {
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one', this.state.secondRaces); }} >
+                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one', this.state.secondRaces)} >
                 <Icon name="truck" color="blue" inverted/>
                 Виртуальные ТС
               </Form.Button>
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => { this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase', this.state.secondRaces); }} >
+                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase', this.state.secondRaces)} >
                 <Icon name="home" color="blue" inverted/>
                 Без баз
               </Form.Button>
@@ -373,7 +396,8 @@ class App extends React.Component {
             setActiveRoute={this.props.setActiveRoute}
             setActiveWaypoint={this.props.setActiveWaypoint}
             activeRouteId={this.props.activeRouteId}
-            activeWaypointId={this.props.activeWaypointId} />
+            activeWaypointId={this.props.activeWaypointId}
+            modalShow={this.modalShow} />
         </div>
         <div id="buttonDivider">
           <Button 
@@ -398,6 +422,9 @@ class App extends React.Component {
             <Overview data={overviewData} />
           </div>
         </div>
+        <ModalExtend 
+          data={this.state.modalData}
+          modalShow={this.modalShow} />
       </div>
     );
   }
@@ -414,6 +441,7 @@ const mapStateToProps = (state) => ({
   center: state.get('center').toJS(),
   isLoading: state.get('isLoading'),
   windowSize: state.get('windowSize'),
+  modalData: state.get('modalData').toObject(),
 });
 
 const mapDispatchToProps = {
@@ -437,6 +465,7 @@ const mapDispatchToProps = {
   uploadXls,
   reloadRoutes,
   setSizeBlocks,
+  saveComment,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
