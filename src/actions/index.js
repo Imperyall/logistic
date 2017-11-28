@@ -9,7 +9,6 @@ import {
   SET_ACTIVE_WAYPOINT,
   BEGIN_LOADING,
   CHANGE_BLOCKS_SIZE,
-  SAVE_COMMENT,
 } from '../constants/actionTypes';
 import BASE_URL from '../constants/baseURL';
 
