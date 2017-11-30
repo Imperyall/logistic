@@ -132,8 +132,8 @@ export const setActiveRoute = (routeIndex, value) => (
   { type: SET_ACTIVE_ROUTE, payload: { routeIndex, value } }
 );
 
-export const setActiveWaypoint = (routeIndex, waypointIndex, value) => (
-  { type: SET_ACTIVE_WAYPOINT, payload: { routeIndex, waypointIndex, value } }
+export const setActiveWaypoint = (routeIndex, waypointIndex, value, add) => (
+  { type: SET_ACTIVE_WAYPOINT, payload: { routeIndex, waypointIndex, value, add } }
 );
 
 export const beginLoading = (isLoading) => {

@@ -60,7 +60,7 @@ export default withGoogleMap((props) => (
                 <Marker
                   key={`m${waypoint.id}`}
                   position={{ lat: +waypoint.lat, lng: +waypoint.lng }}
-                  onClick={() => {props.setActiveWaypoint(rIndex, index, true);}}
+                  onClick={(e) => props.setActiveWaypoint(rIndex, index, true)}
                   icon={`https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=${index + 1}|${color.slice(1)}|000000`}
                 />
              );}),

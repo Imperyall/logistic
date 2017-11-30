@@ -408,7 +408,7 @@ class App extends React.Component {
           </Button>
         </div>
         <div id="rightSide" style={{ width: this.props.windowSize.rightWidth }}>
-          <div style={{width: "inherit", position: "fixed", right: "10px"}}>
+          <div>
             <GoogleMap
               containerElement={<div style={{ height: "60vh" }} />}
               mapElement={<div style={{ height: "60vh" }} />}

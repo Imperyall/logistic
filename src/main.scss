@@ -27,3 +27,9 @@
 #rightSide {
 	float: right;
 }
+
+#rightSide > div {
+	width: inherit;
+	position: fixed;
+	right: 10px;
+}

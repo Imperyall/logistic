@@ -15,9 +15,7 @@ class RouteTable extends React.Component {
           key={index}
           route={route}
           routeIndex={index}
-          onClick={() => {
-            this.props.setActiveRoute(index, !(route.id === this.props.activeRouteId));
-          }}
+          onClick={() => this.props.setActiveRoute(index, !(route.id === this.props.activeRouteId))}
           checked={this.props.checkedRouteIds[route.id]}
           onCheckboxChange={() => this.props.setCheckedRoute(index, !this.props.checkedRouteIds[route.id])}
           active={this.props.activeRouteId === route.id}
@@ -33,6 +31,7 @@ class RouteTable extends React.Component {
         rows = [
           ...rows,
           ...route.waypoints.map((waypoint, index2) => {
+            const active = Array.isArray(this.props.activeWaypointId) ? this.props.activeWaypointId.indexOf(waypoint.id) !== -1 : false;
             return (
               <WaypointRow
                 waypoint={waypoint} key={`${index}-${index2}`}
@@ -40,10 +39,8 @@ class RouteTable extends React.Component {
                 previewMoveWaypoint={this.props.previewMoveWaypoint}
                 endMoveWaypoint={this.props.endMoveWaypoint}
                 modalShow={this.props.modalShow}
-                onClick={() => {
-                  this.props.setActiveWaypoint(index, index2, !(waypoint.id === this.props.activeWaypointId));
-                }}
-                active={this.props.activeWaypointId === waypoint.id}
+                onClick={(e) => this.props.setActiveWaypoint(index, index2, !active, e.ctrlKey)}
+                active={active}
               />
             );
           })
