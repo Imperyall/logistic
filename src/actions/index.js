@@ -40,6 +40,7 @@ export const optimizeRoutes = (fetchParams, pk, useDistance) => (dispatch) => {
 };
 
 export const optimizeAllRoutes = (fetchParams, pk, opts, useDistance, bases, secondRaces) => (dispatch) => {
+  dispatch(beginLoading(true));
   return axios.get(`${BASE_URL}/routes/all/`, { params: { pk, opts, useDistance, bases, secondRaces } })
     .then(() => {
       dispatch(fetchRoutes(fetchParams));
@@ -177,6 +178,13 @@ export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // Ð
 
 export const saveComment = (fetchParams, { id, text }) => (dispatch) => {
   return axios.get(`${BASE_URL}/index/save/`, { params: { id, comment: text } })
+    .then(() => {
+      dispatch(fetchRoutes(fetchParams));
+    });
+};
+
+export const moveWaypoints = (fetchParams, { route, ids }) => (dispatch) => {
+  return axios.get(`${BASE_URL}/index/save/`, { params: route, ids })
     .then(() => {
       dispatch(fetchRoutes(fetchParams));
     });

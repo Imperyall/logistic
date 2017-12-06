@@ -55,12 +55,13 @@ export default withGoogleMap((props) => (
           return [
             ...acc,
             ...cur.waypoints.map((waypoint, index) => {
-              const color = props.activeWaypointId !== waypoint.id ? cur.color : '#f00';
+              const active = Array.isArray(props.activeWaypointId) ? props.activeWaypointId.indexOf(waypoint.id) !== -1 : false;
+              const color = !active ? cur.color : '#f00';
               return (
                 <Marker
                   key={`m${waypoint.id}`}
                   position={{ lat: +waypoint.lat, lng: +waypoint.lng }}
-                  onClick={(e) => props.setActiveWaypoint(rIndex, index, true)}
+                  onClick={() => props.setActiveWaypoint(rIndex, index, true)}
                   icon={`https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=${index + 1}|${color.slice(1)}|000000`}
                 />
              );}),

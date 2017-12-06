@@ -102,7 +102,7 @@ export default function rootReducer(state = initialState, action) {
     case SET_ACTIVE_WAYPOINT:
       return (() => {
         let newState = state;
-        const { routeIndex, waypointIndex, value, add } = action.payload;
+        const { routeIndex, waypointIndex, add } = action.payload;
         const waypoint = state.get('routes').get(routeIndex).get('waypoints').get(waypointIndex);
 
         let array = state.get('activeWaypointId') ? state.get('activeWaypointId') : [], 
