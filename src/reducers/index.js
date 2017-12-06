@@ -102,16 +102,26 @@ export default function rootReducer(state = initialState, action) {
     case SET_ACTIVE_WAYPOINT:
       return (() => {
         let newState = state;
-        const { routeIndex, waypointIndex, value } = action.payload;
+        const { routeIndex, waypointIndex, add } = action.payload;
         const waypoint = state.get('routes').get(routeIndex).get('waypoints').get(waypointIndex);
 
-        if (value) {
-          const center = Map({ lat: +waypoint.get('lat'), lng: +waypoint.get('lng')});
-          newState = newState.set('center', center);
+        let array = state.get('activeWaypointId') ? state.get('activeWaypointId') : [], 
+            id = waypoint.get('id'),
+            ind = array.indexOf(id);
+
+        if (add) {
+          ind !== -1 ? (array.length == 1 ? array = null : array.splice(ind, 1)) : array.push(id);
+        } else {
+          ind === -1 ? array = [id] : array = null;
         }
 
+        //if (value) {
+          const center = Map({ lat: +waypoint.get('lat'), lng: +waypoint.get('lng')});
+          newState = newState.set('center', center);
+        //}
+
         return newState
-          .set('activeWaypointId', value ? waypoint.get('id') : null)
+          .set('activeWaypointId', array)
           .set('activeRouteId', null);
         })();
     case BEGIN_LOADING:

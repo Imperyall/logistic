@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Icon, Button, Loader } from 'semantic-ui-react';
+import { Form, Button, Loader, Dropdown } from 'semantic-ui-react';
 import GoogleMap from '../components/GoogleMap';
 import moment from 'moment';
 import {
@@ -26,6 +26,7 @@ import {
   reloadRoutes,
   setSizeBlocks,
   saveComment,
+  moveWaypoints,
 } from '../actions';
 import Table from '../components/Table';
 import Overview from '../components/Overview';
@@ -273,7 +274,7 @@ class App extends React.Component {
                 basic
                 color="blue"
                 onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance)} >
-                <Icon name="road" color="blue" />
+                {/*<Icon name="road" color="blue" />*/}
                 Оптимизировать
               </Form.Button>
               <Button 
@@ -329,49 +330,62 @@ class App extends React.Component {
                 basic
                 color="yellow"
                 onClick={() => this.props.changeDeps(this.getFetchParams(), deliveryDeps, checkedRouteIdsArray)} >
-                <Icon name="home" color="yellow" />
+                {/*<Icon name="home" color="yellow" />*/}
                 Сменить базу
               </Form.Button>
               <Form.Button
                 basic
                 color="green"
                 onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} >
-                <Icon name="table" color="green" />
+                {/*<Icon name="table" color="green" />*/}
                 Выгрузить отчет
               </Form.Button>
+              {this.props.activeWaypointId !== null ? 
+              <Dropdown 
+                text="Переместить" 
+                icon="move"
+                labeled
+                button 
+                className='icon move-button'>
+                <Dropdown.Menu>
+                  <Dropdown.Header content="Маршрут для перемещения" />
+                  {this.props.routes.map(item => 
+                    <Dropdown.Item key={item.id} value={item.id} onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />)}
+                </Dropdown.Menu>  
+              </Dropdown> : null }
             </Form.Group>
             <Form.Group>
               <Form.Button
                 basic
                 color="blue"
                 onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one', this.state.secondRaces)} >
-                <Icon name="truck" color="blue"/>
-                <Icon name="truck" color="blue" inverted/>
+                {/*<Icon name="truck" color="blue"/>
+                <Icon name="truck" color="blue" inverted/>*/}
                 Закрепленные ТС
               </Form.Button>
               <Form.Button
                 basic
                 color="blue"
                 onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one', this.state.secondRaces)} >
-                <Icon name="truck" color="blue"/>
+                {/*<Icon name="truck" color="blue"/>
                 <Icon name="plus" color="blue"/>
-                <Icon name="truck" color="blue" inverted/>
+                <Icon name="truck" color="blue" inverted/>*/}
                 Минимальные ТС
               </Form.Button>
               <Form.Button
                 basic
                 color="blue"
                 onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one', this.state.secondRaces)} >
-                <Icon name="truck" color="blue" inverted/>
+                {/*<Icon name="truck" color="blue" inverted/>*/}
                 Виртуальные ТС
               </Form.Button>
-              <Form.Button
-                basic
-                color="blue"
-                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase', this.state.secondRaces)} >
-                <Icon name="home" color="blue" inverted/>
-                Без баз
-              </Form.Button>
+              {/* <Form.Button
+              //   basic
+              //   color="blue"
+              //   onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase', this.state.secondRaces)} >
+              //   <Icon name="home" color="blue" inverted/>
+              //   Без баз
+              // </Form.Button> */}
               <Form.Checkbox 
                 slider 
                 id="chk2" 
@@ -408,7 +422,7 @@ class App extends React.Component {
           </Button>
         </div>
         <div id="rightSide" style={{ width: this.props.windowSize.rightWidth }}>
-          <div style={{width: "inherit", position: "fixed", right: "10px"}}>
+          <div>
             <GoogleMap
               containerElement={<div style={{ height: "60vh" }} />}
               mapElement={<div style={{ height: "60vh" }} />}
@@ -467,6 +481,7 @@ const mapDispatchToProps = {
   reloadRoutes,
   setSizeBlocks,
   saveComment,
+  moveWaypoints,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
