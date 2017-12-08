@@ -88,7 +88,7 @@ class App extends React.Component {
       fromDate: moment(fromDate).format('DD.MM.YYYY'),
       toDate: moment(toDate).format('DD.MM.YYYY'),
       deliveryDeps: deliveryDeps.length > 0 ? deliveryDeps.join(',') : 'null',
-      showRecycled: showRecycled,
+      showRecycled,
     };
   }
 

@@ -56,6 +56,8 @@ const RouteRow = (props) => {
 
   const style={
     backgroundColor: active ? '#E0E0E0' : route.collection ? '#E0EDEF': route.bin ? "#EFE0E0" : '#EFEFFF',
+    cursor: "pointer",
+    userSelect: "none",
   };
 // backgroundColor: route.collection ? '#F0FDFF':'#ffffff'
 

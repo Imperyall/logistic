@@ -57,10 +57,8 @@ const getRouteBounds = (route) => {
 export default function rootReducer(state = initialState, action) {
   switch (action.type) {
     case FETCH_ROUTES_SUCCESS:
-      return state.set(
-        'routes',
-        fromJS(action.payload.map((item, index) => ({ ...item, color: getRouteColor(index) })))
-      ).set('isLoading', false);
+      return state.set('routes', fromJS(action.payload.map((item, index) => ({ ...item, color: getRouteColor(index) }))))
+        .set('isLoading', false);
     case FETCH_DELIVERY_DEPS_SUCCESS:
       return state.set('deliveryDeps', fromJS(action.payload));
     case MOVE_WAYPOINT:
@@ -72,16 +70,39 @@ export default function rootReducer(state = initialState, action) {
       );
     case SET_CHECKED_ROUTE:
       return (() => {
-        let newState = state;
-        const { routeIndex, value } = action.payload;
-        const route = state.get('routes').get(routeIndex);
-        newState = newState.set(
-          'bounds',
-          value ?
-            fromJS({ ...getRouteBounds(route).toJSON(), hash: getRandomString() }) :
-            null
-        );
-        return newState.setIn(['checkedRouteIds', route.get('id')], value);
+        let newState = state, shi = false;
+        const { routeIndex, value, shift } = action.payload;
+        const route = state.get('routes').get(routeIndex),
+              id = route.get('id');
+
+        if (shift) {
+          let array = state.get('checkedRouteIds').toJSON(),
+              checks = [], count = 0;
+          for (let key in array) {
+            if (array[key]) {
+              count++;
+              checks.push(key);
+            }
+          }
+          if (count === 1) {
+            if (id === parseInt(checks[0])) {
+              newState = newState.setIn(['checkedRouteIds', id], false);
+            } else {
+              let routes = state.get('routes').toJSON(), next;
+              if (routes.length) routes.forEach((item, index) => {
+                if (item.id == checks[0]) next = index;
+              })
+              let first = Math.min(next, routeIndex),
+                  sec = Math.max(next, routeIndex);
+              for (let i = first; i <= sec; i++) {
+                newState = newState.setIn(['checkedRouteIds', state.get('routes').get(i).get('id')], true);
+              }
+              shi = true;
+            }
+          }
+        }
+        newState = newState.set('bounds', value ? fromJS({ ...getRouteBounds(route).toJSON(), hash: getRandomString() }) : null);
+        return shi ? newState : newState.setIn(['checkedRouteIds', id], value);
       })();
     case SET_ACTIVE_ROUTE:
       return (() => {
@@ -89,13 +110,7 @@ export default function rootReducer(state = initialState, action) {
         const { routeIndex, value } = action.payload;
         const route = state.get('routes').get(routeIndex);
 
-        return newState
-          .set(
-            'bounds',
-            value ?
-              fromJS({ ...getRouteBounds(route).toJSON(), hash: getRandomString() }) :
-              null
-          )
+        return newState.set('bounds', value ? fromJS({ ...getRouteBounds(route).toJSON(), hash: getRandomString() }) : null)
           .set('activeRouteId', value ? state.get('routes').get(routeIndex).get('id') : null)
           .set('activeWaypointId', null);
       })();
@@ -125,7 +140,7 @@ export default function rootReducer(state = initialState, action) {
           .set('activeRouteId', null);
         })();
     case BEGIN_LOADING:
-      return state.set('isLoading', action.payload);
+      return state.get('isLoading') && action.payload ? state : state.set('isLoading', action.payload);
     case CHANGE_BLOCKS_SIZE:
       return state.set('windowSize', action.payload);
     case SAVE_COMMENT:

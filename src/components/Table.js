@@ -17,7 +17,7 @@ class RouteTable extends React.Component {
           routeIndex={index}
           onClick={() => this.props.setActiveRoute(index, !(route.id === this.props.activeRouteId))}
           checked={this.props.checkedRouteIds[route.id]}
-          onCheckboxChange={() => this.props.setCheckedRoute(index, !this.props.checkedRouteIds[route.id])}
+          onCheckboxChange={(e) => this.props.setCheckedRoute(index, !this.props.checkedRouteIds[route.id], e.shiftKey)}
           active={this.props.activeRouteId === route.id}
           endMoveWaypoint={this.props.endMoveWaypoint}
           onToggleOpen={(e) => {
