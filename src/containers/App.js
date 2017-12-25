@@ -52,6 +52,9 @@ class App extends React.Component {
     this.handleSecondRaces = this.handleSecondRaces.bind(this);
     this.handleModalShow = this.handleModalShow.bind(this);
     this.modalShow = this.modalShow.bind(this);
+    this.onMoveWaypoint = this.onMoveWaypoint.bind(this);
+    this.handleLockMap = this.handleLockMap.bind(this);
+    this.handleShowText = this.handleShowText.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
@@ -63,6 +66,8 @@ class App extends React.Component {
       secondRaces: false,
       windowSize: {},
       modalData: {},
+      lockMap: false,
+      showText: { display: "none", text1: null, text2: null },
     };
   }
 
@@ -70,6 +75,10 @@ class App extends React.Component {
     this.props.fetchDeliveryDeps(this.getFetchParams());
     this.props.fetchRoutes(this.getFetchParams());
     this.props.setSizeBlocks();
+    document.onmouseup = () => {
+      if (this.state.showText.display !== "none") this.handleShowText({});
+      document.onmousemove = () => {};
+    };
   }
 
   componentDidUpdate(prevProps) {
@@ -118,6 +127,29 @@ class App extends React.Component {
 
   handleModalShow() {
     this.setState({modalData: { open: !this.state.modalData.open}});
+  }
+
+  handleLockMap(state) {
+    this.setState({ lockMap: state });
+  }
+
+  handleShowText({ text1, text2, id }) {
+    if (!text1 && !text2) {
+      if (this.state.showText.text1 !== null || this.state.showText.text2 !== null) this.setState({ showText: { display: "none", id: 0, text1: null, text2: null } });
+    } else if (!text2) {
+      if (text1 !== this.state.showText.text1) this.setState({ showText: { display: "block", id: id, text1: text1, text2: null } });
+    } else {
+      if (text2 !== this.state.showText.text2) this.setState((prevState) => {
+        return {
+          showText: { 
+            display: "block", 
+            id: prevState.showText.id, 
+            text1: prevState.showText.text1, 
+            text2: text2,
+          }
+        };
+      });
+    }
   }
 
   modalShow({ open, id, text, id1 }) {
@@ -186,6 +218,38 @@ class App extends React.Component {
       app.props.setSizeBlocks(prop, true);
       w._divider = prop;
       //Callback если нужен
+      d.onmousedown = () => {};
+      d.onmousemove = () => {};
+    };
+  }
+
+  onMoveWaypoint({ waypointId, routeId, waypointText, routeText }) {
+    if (waypointText) this.handleShowText({ text1: waypointText, id: waypointId });
+    let sh = this.state.showText.display === "block";
+    if (sh && routeText) this.handleShowText({ text2: routeText });
+
+    if (!sh) return;
+
+    let app = this, d = document;
+    let block = d.getElementById("moveText");
+
+    function move(e) {
+      block.style.top = e.clientY + 15 + "px";
+      block.style.left = e.clientX + 15 + "px";
+    }
+
+    d.onmousedown = () => { return false; };
+    d.onmousemove = (e) => { //Начальные параметры
+      move(e);
+      d.onmousemove = (e) => { //Действия при смещении
+        move(e);
+      };
+    };
+    d.onmouseup = () => {
+      console.log('Перемещение ' + app.state.showText.id + " в " + routeId);
+      //app.props.moveWaypoints(app.getFetchParams(), route, id);
+      app.handleShowText({});
+
       d.onmousedown = () => {};
       d.onmousemove = () => {};
     };
@@ -405,14 +469,17 @@ class App extends React.Component {
             moveWaypoint={this.handleMoveWaypoint}
             endMoveWaypoint={(d, h) => this.handleMoveWaypoint(d, h, true)}
             toggleOpenRoute={this.props.toggleOpenRoute}
+            handleShowText={this.handleShowText}
             setCheckedRoute={this.props.setCheckedRoute}
             checkedRouteIds={this.props.checkedRouteIds}
+            onMoveWaypoint={this.onMoveWaypoint}
             openRouteIds={this.props.openRouteIds}
             setActiveRoute={this.props.setActiveRoute}
             setActiveWaypoint={this.props.setActiveWaypoint}
             activeRouteId={this.props.activeRouteId}
             activeWaypointId={this.props.activeWaypointId}
-            modalShow={this.modalShow} />
+            modalShow={this.modalShow}
+            showText={this.state.showText} />
         </div>
         <div id="buttonDivider">
           <Button 
@@ -427,11 +494,16 @@ class App extends React.Component {
               containerElement={<div style={{ height: "60vh" }} />}
               mapElement={<div style={{ height: "60vh" }} />}
               routes={this.props.routes}
+              lockMap={this.state.lockMap}
+              handleLockMap={this.handleLockMap}
+              handleShowText={this.handleShowText}
+              onMoveWaypoint={this.onMoveWaypoint}
               onMapLoad={this.handleMapLoad}
               center={this.props.center}
               markerPosition={this.props.markerPosition}
               markerIcon={this.props.markerIcon}
               activeWaypointId={this.props.activeWaypointId}
+              markers={this.props.markers}
               setActiveWaypoint={this.props.setActiveWaypoint}
               checkedRouteIds={this.props.checkedRouteIds} />
             <Overview data={overviewData} />
@@ -440,6 +512,11 @@ class App extends React.Component {
         <ModalExtend 
           data={this.state.modalData}
           modalShow={this.modalShow} />
+        <div
+          id="moveText"
+          className="moveText"
+          dangerouslySetInnerHTML={{__html: this.state.showText.text2 === null ? "Точка: " + this.state.showText.text1 : "Точка: " + this.state.showText.text1 + "<br/>" + "Переместить в: " + this.state.showText.text2}}
+          style={{ display: this.state.showText.display }}/>
       </div>
     );
   }
@@ -457,6 +534,7 @@ const mapStateToProps = (state) => ({
   isLoading: state.get('isLoading'),
   windowSize: state.get('windowSize'),
   modalData: state.get('modalData').toObject(),
+  markers: state.get('markers').toJS(),
 });
 
 const mapDispatchToProps = {

@@ -211,7 +211,7 @@ export const saveComment = (fetchParams, { id, text }) => (dispatch) => {
 };
 
 export const moveWaypoints = (fetchParams, { route, ids }) => (dispatch) => {
-  return axios.get(`${BASE_URL}/index/save/`, { params: route, ids })
+  return axios.get(`${BASE_URL}/index/move/`, { params: route, ids })
     .then((res) => {
       console.log('[RESPONSE][moveWaypoints]', res.data.length ? res.data : 'null');
       dispatch(fetchRoutes(fetchParams));

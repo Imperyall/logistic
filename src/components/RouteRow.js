@@ -51,7 +51,8 @@ const RouteRow = (props) => {
     onClick,
     active,
     checked,
-    connectDropTarget
+    connectDropTarget,
+    rowTitle,
   } = props;
 
   const style={
@@ -62,7 +63,10 @@ const RouteRow = (props) => {
 // backgroundColor: route.collection ? '#F0FDFF':'#ffffff'
 
   return connectDropTarget(
-    <tr key={routeIndex} onClick={onClick} style={style}>
+    <tr key={routeIndex} 
+        onClick={onClick}
+        onMouseOver={() => props.onMoveWaypoint({ routeText: rowTitle + (route.id1 === null ? "" : route.id1), routeId: route.id })} 
+        style={style}>
       <Th collapsing>
         <Checkbox
           onClick={(e) => e.stopPropagation()}
@@ -75,7 +79,7 @@ const RouteRow = (props) => {
         <span/>{route.recycled && <Icon name="remove circle" color="red" />}
         <span/>{route.accepted && <Icon name="check circle" color="green" />}
         <small>
-          {route.collection ? "Набор РНК " : route.collectionRem ? "Непопавшие РНК " : route.bin ? "Корзина" : "Маршрут "}
+          {rowTitle}
           {/*{route.collectionRem && "Непопавшие РНК "}*/}
           {route.id1} <br/> {!route.bin && <small>{route.createdDate}</small>}
         </small>

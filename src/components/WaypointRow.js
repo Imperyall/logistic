@@ -53,7 +53,7 @@ const collect2 = (connect, monitor) => {
 
 class Waypoint extends React.Component {
   render() {
-    const { connectDragSource, connectDropTarget, isDragging, waypoint, active } = this.props;
+    const { connectDragSource, connectDropTarget, isDragging, waypoint, active, rowTitle, rowId } = this.props;
     const style={
       cursor: 'move',
       opacity: isDragging ? 0.95 : 1,
@@ -64,7 +64,10 @@ class Waypoint extends React.Component {
     // It didn't want to work with Semantic's Table.Row Component;
     // Should create an issue maybe?
     return connectDragSource(connectDropTarget(
-      <tr style={style}>
+      <tr style={style} 
+          onMouseOver={() => {
+            this.props.onMoveWaypoint({ routeId: rowId, routeText: rowTitle });
+          }}>
         <Table.Cell onClick={this.props.onClick}><small>{waypoint.num}</small></Table.Cell>
         <Table.Cell onClick={this.props.onClick}>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small></Table.Cell>
         <Table.Cell onClick={this.props.onClick}><small>{waypoint.title}</small></Table.Cell>

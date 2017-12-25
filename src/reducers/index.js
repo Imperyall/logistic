@@ -27,6 +27,7 @@ const initialState = fromJS({
   center: Map({ lat: 45.0392651, lng: 39.0817043 }),
   windowSize: {},
   modalData: {},
+  markers: {},
 });
 
 
@@ -70,9 +71,10 @@ export default function rootReducer(state = initialState, action) {
       );
     case SET_CHECKED_ROUTE:
       return (() => {
-        let newState = state, shi = false;
+        let newState = state, shi = false, markers = state.get('markers').toJSON();
         const { routeIndex, value, shift } = action.payload;
         const route = state.get('routes').get(routeIndex),
+              waypoints = route.get('waypoints').toJSON(),
               id = route.get('id');
 
         if (shift) {
@@ -86,7 +88,9 @@ export default function rootReducer(state = initialState, action) {
           }
           if (count === 1) {
             if (id === parseInt(checks[0])) {
-              newState = newState.setIn(['checkedRouteIds', id], false);
+              delete markers[routeIndex];
+              newState = newState.setIn(['checkedRouteIds', id], false)
+                .set('markers', fromJS(markers));
             } else {
               let routes = state.get('routes').toJSON(), next;
               if (routes.length) routes.forEach((item, index) => {
@@ -96,12 +100,28 @@ export default function rootReducer(state = initialState, action) {
                   sec = Math.max(next, routeIndex);
               for (let i = first; i <= sec; i++) {
                 newState = newState.setIn(['checkedRouteIds', state.get('routes').get(i).get('id')], true);
+                let wa = state.get('routes').get(i).get('waypoints').toJSON();
+                for (let key in wa) {
+                  if (!markers[i]) markers[i] = new Array();
+                  markers[i].push({ lat: +wa[key].lat, lng: +wa[key].lng });
+                }
               }
               shi = true;
             }
           }
         }
-        newState = newState.set('bounds', value ? fromJS({ ...getRouteBounds(route).toJSON(), hash: getRandomString() }) : null);
+        if (!shi) {
+          if (value) {
+            for (let key of waypoints) {
+              if (!markers[routeIndex]) markers[routeIndex] =  new Array();
+              markers[routeIndex].push({ lat: +key.lat, lng: +key.lng });
+            }
+          } else {
+            delete markers[routeIndex];
+          }
+        }
+        newState = newState.set('bounds', value ? fromJS({ ...getRouteBounds(route).toJSON(), hash: getRandomString() }) : null)
+          .set('markers', fromJS(markers));
         return shi ? newState : newState.setIn(['checkedRouteIds', id], value);
       })();
     case SET_ACTIVE_ROUTE:

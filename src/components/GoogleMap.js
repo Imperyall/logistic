@@ -11,6 +11,9 @@ const decodeLevels = (encodedLevelsString) => {
     return decodedLevels;
 };
 
+const isActiveWaypoint = (w, i) => {
+  return Array.isArray(w) && w.indexOf(i) !== -1;
+};
 
 const arrowSymbol = {
   path: 'M0,-1 L0,1 L3,0 z',
@@ -29,7 +32,7 @@ const renderRoutePolylines = (route, activeWaypointId) => route.waypoints.map((w
         repeat: '100px',
         offset: '100%',
       }],
-      strokeColor: activeWaypointId !== waypoint.id ? route.color : '#f00',
+      strokeColor: isActiveWaypoint(activeWaypointId, waypoint.id) ? '#f00' : route.color,
       levels: decodeLevels('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
     }}
     path={
@@ -41,12 +44,14 @@ const renderRoutePolylines = (route, activeWaypointId) => route.waypoints.map((w
   />
 ));
 
-
 export default withGoogleMap((props) => (
   <GoogleMap
     ref={props.onMapLoad}
     defaultZoom={13}
     defaultCenter={props.defaultCenter}
+    options={{
+      draggable: !props.lockMap,
+    }}
     center={props.center}
   >
     {
@@ -55,16 +60,24 @@ export default withGoogleMap((props) => (
           return [
             ...acc,
             ...cur.waypoints.map((waypoint, index) => {
-              const active = Array.isArray(props.activeWaypointId) ? props.activeWaypointId.indexOf(waypoint.id) !== -1 : false;
-              const color = !active ? cur.color : '#f00';
+              const color = isActiveWaypoint(props.activeWaypointId, waypoint.id) ? '#f00' : cur.color;
+              const pos = { lat: +waypoint.lat, lng: +waypoint.lng };
               return (
                 <Marker
                   key={`m${waypoint.id}`}
-                  position={{ lat: +waypoint.lat, lng: +waypoint.lng }}
+                  position={pos}
+                  onMouseOver={() => {
+                    props.handleLockMap(true);
+                  }}
+                  onMouseOut={() => {
+                    props.handleLockMap(false);
+                  }}
+                  onMouseDown={() => props.onMoveWaypoint({ waypointText: waypoint.id1, waypointId: waypoint.id }) }
                   onClick={() => props.setActiveWaypoint(rIndex, index, true)}
                   icon={`https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=${index + 1}|${color.slice(1)}|000000`}
                 />
-             );}),
+              );
+            }),
             ...renderRoutePolylines(cur, props.activeWaypointId)
           ];
         }

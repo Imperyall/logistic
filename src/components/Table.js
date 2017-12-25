@@ -10,16 +10,20 @@ import './Table.scss';
 class RouteTable extends React.Component {
   render() {
     const routeTables = this.props.routes.map((route, index) => {
+      const rowTitle = route.collection ? "Набор РНК" : route.collectionRem ? "Непопавшие РНК " : route.bin ? "Корзина" : "Маршрут ";
       let rows = [
         <RouteRow
           key={index}
           route={route}
+          rowTitle={rowTitle}
           routeIndex={index}
+          onMoveWaypoint={this.props.onMoveWaypoint}
           onClick={() => this.props.setActiveRoute(index, !(route.id === this.props.activeRouteId))}
           checked={this.props.checkedRouteIds[route.id]}
           onCheckboxChange={(e) => this.props.setCheckedRoute(index, !this.props.checkedRouteIds[route.id], e.shiftKey)}
           active={this.props.activeRouteId === route.id}
           endMoveWaypoint={this.props.endMoveWaypoint}
+          showText={this.props.showText}
           onToggleOpen={(e) => {
             e.stopPropagation();
             this.props.toggleOpenRoute(route.id);
@@ -34,8 +38,12 @@ class RouteTable extends React.Component {
             const active = Array.isArray(this.props.activeWaypointId) ? this.props.activeWaypointId.indexOf(waypoint.id) !== -1 : false;
             return (
               <WaypointRow
-                waypoint={waypoint} key={`${index}-${index2}`}
+                key={index2}
+                waypoint={waypoint} //key={`${index}-${index2}`}
                 index={{ routeIndex: index, waypointIndex: index2 }}
+                rowTitle={rowTitle + (route.id1 === null ? "" : route.id1)}
+                rowId={route.id}
+                onMoveWaypoint={this.props.onMoveWaypoint}
                 previewMoveWaypoint={this.props.previewMoveWaypoint}
                 endMoveWaypoint={this.props.endMoveWaypoint}
                 modalShow={this.props.modalShow}

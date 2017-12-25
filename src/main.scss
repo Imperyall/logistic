@@ -37,3 +37,12 @@
 .move-button {
 	max-height: 35px;
 }
+
+.moveText {
+	position: absolute;
+	border: 1px solid #000;
+    border-radius: 3px;
+    opacity: 0.9;
+    padding: 5px;
+    background-color: #fff;
+}
