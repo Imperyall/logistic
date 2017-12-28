@@ -174,18 +174,18 @@ export const setNewBlocksSize = (data) => (
 );
 
 export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // Функция пересчета размера элементов
-  let w = window, d = document;
+  const w = window, d = document;
   if (param != w._divider) {
     param = w._divider || param;
     w._sb = w.innerWidth - d.body.clientWidth || 0;
-    let $left = d.getElementById('leftSide');
-    let $right = d.getElementById('rightSide');
-    let padding = 20, divid = 27; //Отступы по краям, ширина кнопки раздлелителя с отступами
-    let wi = w.innerWidth - padding; //ширина окна, отступ по краям
-    let widivi = divid/wi*100; //Ширина разделителя в процентах
-    let pp = padding/wi*100; //Padding percent
-    let rwi = Number((param - pp).toFixed(2));
-    let lwi = Number((100 - param - widivi).toFixed(2));
+    const $left = d.getElementById('leftSide');
+    const $right = d.getElementById('rightSide');
+    const padding = 20, divid = 27; //Отступы по краям, ширина кнопки раздлелителя с отступами
+    const wi = w.innerWidth - padding; //ширина окна, отступ по краям
+    const widivi = divid/wi*100; //Ширина разделителя в процентах
+    const pp = padding/wi*100; //Padding percent
+    const rwi = Number((param - pp).toFixed(2));
+    const lwi = Number((100 - param - widivi).toFixed(2));
 
     if (final) {
       dispatch(
@@ -194,7 +194,7 @@ export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // �
           'rightWidth': rwi + '%',
         })
       );
-      window.google.maps.event.trigger(window._m.context['__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'], 'resize'); //перестроение размера окна
+      w.google.maps.event.trigger(w._m.context['__SECRET_MAP_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'], 'resize'); //перестроение размера окна
     } else {
       $left.style.width = lwi + '%';
       $right.style.width = rwi + '%';
@@ -203,6 +203,7 @@ export const setSizeBlocks = (param = 33, final = false) => (dispatch) => { // �
 };
 
 export const saveComment = (fetchParams, { id, text }) => (dispatch) => {
+  dispatch(beginLoading());
   return axios.get(`${BASE_URL}/index/save/`, { params: { id, comment: text } })
     .then((res) => {
       console.log('[RESPONSE][saveComment]', res.data.length ? res.data : 'null');
@@ -210,8 +211,9 @@ export const saveComment = (fetchParams, { id, text }) => (dispatch) => {
     });
 };
 
-export const moveWaypoints = (fetchParams, { route, ids }) => (dispatch) => {
-  return axios.get(`${BASE_URL}/index/move/`, { params: route, ids })
+export const moveWaypoints = (fetchParams, route, ids) => (dispatch) => {
+  dispatch(beginLoading());
+  return axios.get(`${BASE_URL}/index/move/`, { params: { route, ids } })
     .then((res) => {
       console.log('[RESPONSE][moveWaypoints]', res.data.length ? res.data : 'null');
       dispatch(fetchRoutes(fetchParams));
