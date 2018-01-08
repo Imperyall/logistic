@@ -50,10 +50,9 @@ const collect2 = (connect, monitor) => {
   };
 };
 
-
 class Waypoint extends React.Component {
   render() {
-    const { connectDragSource, connectDropTarget, isDragging, waypoint, active, rowTitle, rowId } = this.props;
+    const { connectDragSource, connectDropTarget, isDragging, filter, waypoint, active, rowTitle, rowId } = this.props;
     const style={
       cursor: 'move',
       opacity: isDragging ? 0.95 : 1,
@@ -61,18 +60,25 @@ class Waypoint extends React.Component {
       padding: ".2em",
     };
 
+    const filterClass = value => {
+      if (!filter) return 'null';
+      value = Array.isArray(value) ? value : [value];
+      for (let val of value) {
+        return val !== null && String(val).toLowerCase().indexOf(filter.toLowerCase()) !== -1 ? 'activeFilter' : null;
+      }
+    };
+
     // It didn't want to work with Semantic's Table.Row Component;
     // Should create an issue maybe?
     return connectDragSource(connectDropTarget(
       <tr style={style} 
-          onMouseOver={() => {
-            this.props.onMoveWaypoint({ routeId: rowId, routeText: rowTitle });
-          }}>
-        <Table.Cell onClick={this.props.onClick}><small>{waypoint.num}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{waypoint.title}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{waypoint.deliveryDep}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick} colSpan="3"><small>{waypoint.address}</small></Table.Cell>
+          onMouseEnter={() => {  if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: rowId, r_text: rowTitle }); }}
+          onMouseLeave={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: 0, r_text: null }); }} >
+        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.num)}><small>{waypoint.num}</small></Table.Cell>
+        <Table.Cell onClick={this.props.onClick} className={filterClass([waypoint.base, waypoint.id1])}>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small></Table.Cell>
+        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.title)}><small>{waypoint.title}</small></Table.Cell>
+        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.deliveryDep)}><small>{waypoint.deliveryDep}</small></Table.Cell>
+        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.address)} colSpan="3"><small>{waypoint.address}</small></Table.Cell>
         {/*<Table.Cell><small>{(+waypoint.weight).toFixed()}</small></Table.Cell>*/}
         <Table.Cell onClick={this.props.onClick}><small>{waypoint.sku}</small></Table.Cell>
         <Table.Cell onClick={this.props.onClick}><small>{(+waypoint.weight).toFixed()} кг</small></Table.Cell>
@@ -81,7 +87,7 @@ class Waypoint extends React.Component {
         <Table.Cell onClick={this.props.onClick}><small>{(waypoint.distance / 1000).toFixed()} ({waypoint.distance>0 && ((waypoint.distance / waypoint.duration)*3.6).toFixed()} км/ч)</small></Table.Cell>
         <Table.Cell onClick={this.props.onClick}><small>{`${waypoint.deliveryTimeS} - ${waypoint.deliveryTimeE}`}</small></Table.Cell>
         <Table.Cell onClick={this.props.onClick}><small>{pprintSeconds(+waypoint.serviceTime)} ({`${waypoint.plannedTimeS} - ${waypoint.plannedTimeE}`})</small></Table.Cell>
-        <Table.Cell onClick={() => this.props.modalShow({ open: true, id: waypoint.id, id1: waypoint.id1, text: waypoint.comment })} style={{cursor: 'pointer'}} textAlign="center">
+        <Table.Cell onClick={() => this.props.modalShow({ open: true, id: waypoint.id, id1: waypoint.id1, comment: waypoint.comment })} style={{cursor: 'pointer'}} textAlign="center">
           <Icon name="edit" color={waypoint.comment ? 'green' : 'black'} title={waypoint.comment ? waypoint.comment : 'Добавить комментарий'} />
           {/*<Popup*/}
             {/*trigger={*/}

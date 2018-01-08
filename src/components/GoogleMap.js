@@ -1,5 +1,6 @@
 import React from 'react';
 import { withGoogleMap, GoogleMap, Polyline, Marker } from "react-google-maps";
+import { EventUtil } from '../utils';
 
 
 const decodeLevels = (encodedLevelsString) => {
@@ -72,7 +73,7 @@ export default withGoogleMap((props) => (
                   onMouseOut={() => {
                     props.handleLockMap(false);
                   }}
-                  onMouseDown={() => props.onMoveWaypoint({ waypointText: waypoint.id1, waypointId: waypoint.id }) }
+                  onMouseDown={() => new EventUtil({ type: 'GOOGLEMAP', app: props.app, param: { w_text: waypoint.id1, w_id: waypoint.id } })}
                   onClick={() => props.setActiveWaypoint(rIndex, index, true)}
                   icon={`https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=${index + 1}|${color.slice(1)}|000000`}
                 />

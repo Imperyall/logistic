@@ -12,7 +12,7 @@ class ModalExtend extends React.Component {
 	}
 
 	save() {
-		this.props.modalShow({ open: false, id: this.props.data.id, text: this.state.text });
+		this.props.modalShow({ open: false, id: this.props.data.id, comment: this.state.text });
 		this.setState({ text : '' });
 	}
 
@@ -23,7 +23,7 @@ class ModalExtend extends React.Component {
 	componentDidUpdate(prevProps) {
 		const { open } = prevProps.data;
 		if (open != this.props.data.open && !open) {
-			this.setState({ text: this.props.data.text });
+			this.setState({ text: this.props.data.comment });
 		}
 	}
 

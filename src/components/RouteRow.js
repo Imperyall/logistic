@@ -34,7 +34,6 @@ const collect = connect => ({
   connectDropTarget: connect.dropTarget(),
 });
 
-
 const RouteRow = (props) => {
   const Th = (ownProps) => (
     <Table.HeaderCell
@@ -65,7 +64,8 @@ const RouteRow = (props) => {
   return connectDropTarget(
     <tr key={routeIndex} 
         onClick={onClick}
-        onMouseOver={() => props.onMoveWaypoint({ routeText: rowTitle + (route.id1 === null ? "" : route.id1), routeId: route.id })} 
+        onMouseEnter={() => { if (props.ifMoveWaypoint) props.handleWindowRoute({ r_text: rowTitle + (route.id1 === null ? "" : route.id1), r_id: route.id }); }} 
+        onMouseLeave={() => { if (props.ifMoveWaypoint) props.handleWindowRoute({ r_text: null, r_id: 0 }); }}
         style={style}>
       <Th collapsing>
         <Checkbox

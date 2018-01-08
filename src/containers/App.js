@@ -1,41 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Loader, Dropdown } from 'semantic-ui-react';
+import { Form, Button, Loader, Dropdown, Input, Icon } from 'semantic-ui-react';
 import GoogleMap from '../components/GoogleMap';
 import moment from 'moment';
-import {
-  fetchRoutes,
-  fetchDeliveryDeps,
-  moveWaypoint,
-  sortRoutes,
-  toggleOpenRoute,
-  setCheckedRoute,
-  setActiveRoute,
-  setActiveWaypoint,
-  optimizeRoutes,
-  optimizeAllRoutes,
-  addRoutes,
-  recycleRoutes,
-  unrecycleRoutes,
-  acceptRoutes,
-  uploadRoutes,
-  newRoutes,
-  changeDeps,
-  uploadXls,
-  reloadRoutes,
-  setSizeBlocks,
-  saveComment,
-  moveWaypoints,
-} from '../actions';
+import * as actionsMap from '../actions';
+import { debounce, EventUtil } from '../utils';
 import Table from '../components/Table';
 import Overview from '../components/Overview';
-// import * as Buttons from '../constants/buttons';
 import '../main.scss';
 import ModalExtend from '../components/ModalExtend';
+import MoveWindow from '../components/MoveWindow';
 
 const { LatLngBounds } = window.google.maps;
-
 
 class App extends React.Component {
   constructor() {
@@ -52,9 +29,8 @@ class App extends React.Component {
     this.handleSecondRaces = this.handleSecondRaces.bind(this);
     this.handleModalShow = this.handleModalShow.bind(this);
     this.modalShow = this.modalShow.bind(this);
-    this.onMoveWaypoint = this.onMoveWaypoint.bind(this);
     this.handleLockMap = this.handleLockMap.bind(this);
-    this.handleShowText = this.handleShowText.bind(this);
+    this.handleFilterValue = this.handleFilterValue.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
@@ -64,10 +40,9 @@ class App extends React.Component {
       isLoading: true,
       useDistance: false,
       secondRaces: false,
-      windowSize: {},
       modalData: {},
       lockMap: false,
-      showText: { display: "none", text1: null, text2: null },
+      filterValue: '',
     };
   }
 
@@ -75,17 +50,13 @@ class App extends React.Component {
     this.props.fetchDeliveryDeps(this.getFetchParams());
     this.props.fetchRoutes(this.getFetchParams());
     this.props.setSizeBlocks();
-    document.onmouseup = () => {
-      if (this.state.showText.display !== "none") this.handleShowText({});
-      document.onmousemove = () => {};
-    };
   }
 
   componentDidUpdate(prevProps) {
     const { bounds } = this.props;
 
-    if (bounds && !bounds.equals(prevProps.bounds)) {
-      const { east, north, south, west } = bounds.toObject();
+    if (bounds && bounds !== prevProps.bounds) {
+      const { east, north, south, west } = bounds;//.toObject();
       const boundsObj = new LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east });
       this._mapComponent.fitBounds(boundsObj);
     }
@@ -114,55 +85,43 @@ class App extends React.Component {
   }
 
   handleShowRecycled() {
-    this.setState({ showRecycled: !this.state.showRecycled});
+    this.setState((prevState) => { 
+      return { showRecycled: !prevState.showRecycled };
+    });
   }
 
   handleUseDistance() {
-    this.setState({ useDistance: !this.state.useDistance});
+    this.setState((prevState) => { 
+      return { useDistance: !prevState.useDistance };
+    });
   }
 
   handleSecondRaces() {
-    this.setState({ secondRaces: !this.state.secondRaces});
+    this.setState((prevState) => { 
+      return { secondRaces: !prevState.secondRaces };
+    });
   }
 
   handleModalShow() {
-    this.setState({modalData: { open: !this.state.modalData.open}});
+    this.setState((prevState) => { 
+      return { modalData: { open : !prevState.modalData.open } };
+    });
+  }
+
+  handleFilterValue(data) {
+    this.setState({ filterValue: data.value});
   }
 
   handleLockMap(state) {
     this.setState({ lockMap: state });
   }
 
-  handleShowText({ text1, text2, id }) {
-    if (!text1 && !text2) {
-      if (this.state.showText.text1 !== null || this.state.showText.text2 !== null) this.setState({ showText: { display: "none", id: 0, text1: null, text2: null } });
-    } else if (!text2) {
-      if (text1 !== this.state.showText.text1) this.setState({ showText: { display: "block", id: id, text1: text1, text2: null } });
-    } else {
-      if (text2 !== this.state.showText.text2) this.setState((prevState) => {
-        return {
-          showText: { 
-            display: "block", 
-            id: prevState.showText.id, 
-            text1: prevState.showText.text1, 
-            text2: text2,
-          }
-        };
-      });
-    }
-  }
-
-  modalShow({ open, id, text, id1 }) {
+  modalShow({ open, id, comment, id1 }) {
     if (!open && id) {
-      this.props.saveComment(this.getFetchParams(), { id, text });
+      this.props.saveComment(this.getFetchParams(), { id, comment });
     }
     this.setState({
-      modalData: { 
-        open: open,
-        id: id,
-        text: text,
-        id1: id1,
-      }
+      modalData: { open, id, comment, id1 }
     });
   }
 
@@ -192,67 +151,6 @@ class App extends React.Component {
   handleMapLoad(map) {
     this._mapComponent = map;
     window._m = map;
-  }
-
-  onResizeBody(/*callback*/) {
-    let app = this;
-    let d = document, w = window;
-    let prop = w._divider || 33;
-    w._divider = 0;
-    d.onmousedown = () => { return false; };
-    d.onmousemove = () => { //Начальные параметры
-      d.onmousemove = (e) => { //Действия при смещении
-        let nx = e.clientX;
-        w._sb = w.innerWidth - d.body.clientWidth;
-        let wi = w.innerWidth - 20 - w._sb;
-        prop = Number((wi - nx)/wi*100);
-        if (prop > 50) {
-          prop = 50;
-        } else if (prop < 20) {
-          prop = 20;
-        }
-        app.props.setSizeBlocks(prop);
-      };
-    };
-    d.onmouseup = () => {
-      app.props.setSizeBlocks(prop, true);
-      w._divider = prop;
-      //Callback если нужен
-      d.onmousedown = () => {};
-      d.onmousemove = () => {};
-    };
-  }
-
-  onMoveWaypoint({ waypointId, routeId, waypointText, routeText }) {
-    if (waypointText) this.handleShowText({ text1: waypointText, id: waypointId });
-    let sh = this.state.showText.display === "block";
-    if (sh && routeText) this.handleShowText({ text2: routeText });
-
-    if (!sh) return;
-
-    let app = this, d = document;
-    let block = d.getElementById("moveText");
-
-    function move(e) {
-      block.style.top = e.clientY + 15 + "px";
-      block.style.left = e.clientX + 15 + "px";
-    }
-
-    d.onmousedown = () => { return false; };
-    d.onmousemove = (e) => { //Начальные параметры
-      move(e);
-      d.onmousemove = (e) => { //Действия при смещении
-        move(e);
-      };
-    };
-    d.onmouseup = () => {
-      console.log('Перемещение ' + app.state.showText.id + " в " + routeId);
-      //app.props.moveWaypoints(app.getFetchParams(), route, id);
-      app.handleShowText({});
-
-      d.onmousedown = () => {};
-      d.onmousemove = () => {};
-    };
   }
 
   render() {
@@ -390,13 +288,13 @@ class App extends React.Component {
                 icon="recycle"
                 onClick={() => this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
               </Button>
-              <Form.Button
+              {/*<Form.Button
                 basic
                 color="yellow"
                 onClick={() => this.props.changeDeps(this.getFetchParams(), deliveryDeps, checkedRouteIdsArray)} >
                 {/*<Icon name="home" color="yellow" />*/}
-                Сменить базу
-              </Form.Button>
+                {/*Сменить базу*/}
+              {/*</Form.Button>*/}
               <Form.Button
                 basic
                 color="green"
@@ -404,6 +302,25 @@ class App extends React.Component {
                 {/*<Icon name="table" color="green" />*/}
                 Выгрузить отчет
               </Form.Button>
+              {checkedRouteIdsArray.length !== 0 ? 
+              <Dropdown 
+                text="Сменить базу" 
+                icon="move"
+                labeled
+                button 
+                className='icon deps-button'>
+                <Dropdown.Menu>
+                  <Dropdown.Header content="Базы" />
+                  <Dropdown.Divider />
+                  {this.props.deliveryDeps.map(option => 
+                    <Dropdown.Item 
+                      key={option.id} 
+                      value={option.id} 
+                      onClick={() => this.props.changeDeps(this.getFetchParams(), [option.id], checkedRouteIdsArray)} 
+                      text={option.title} />
+                  )}
+                </Dropdown.Menu>  
+              </Dropdown> : null }
               {this.props.activeWaypointId !== null ? 
               <Dropdown 
                 text="Переместить" 
@@ -413,8 +330,14 @@ class App extends React.Component {
                 className='icon move-button'>
                 <Dropdown.Menu>
                   <Dropdown.Header content="Маршрут для перемещения" />
+                  <Dropdown.Divider />
                   {this.props.routes.map(item => 
-                    <Dropdown.Item key={item.id} value={item.id} onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />)}
+                    <Dropdown.Item 
+                      key={item.id} 
+                      value={item.id} 
+                      onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} 
+                      text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />
+                  )}
                 </Dropdown.Menu>  
               </Dropdown> : null }
             </Form.Group>
@@ -464,15 +387,25 @@ class App extends React.Component {
                 label="Повторный выезд" />
             </Form.Group>
           </Form>
+          <Input 
+            icon
+            placeholder='Фильтр...'
+            size='small'
+            onChange={debounce((e, d) => this.handleFilterValue(d), 500)}
+            className="filter-input">
+            <input />
+            <Icon name='search' />
+          </Input>
           <Table
             routes={[...this.props.routes]}
+            filter={this.state.filterValue}
             moveWaypoint={this.handleMoveWaypoint}
-            endMoveWaypoint={(d, h) => this.handleMoveWaypoint(d, h, true)}
+            endMoveWaypoint={(d, h) => this.handleMoveWaypoint(d, h)}
             toggleOpenRoute={this.props.toggleOpenRoute}
-            handleShowText={this.handleShowText}
+            handleWindowRoute={this.props.handleWindowRoute}
+            ifMoveWaypoint={this.props.moveWindow.show}
             setCheckedRoute={this.props.setCheckedRoute}
             checkedRouteIds={this.props.checkedRouteIds}
-            onMoveWaypoint={this.onMoveWaypoint}
             openRouteIds={this.props.openRouteIds}
             setActiveRoute={this.props.setActiveRoute}
             setActiveWaypoint={this.props.setActiveWaypoint}
@@ -485,7 +418,7 @@ class App extends React.Component {
           <Button 
             title="Изменить размер"
             icon="resize horizontal"
-            onMouseDown={() => this.onResizeBody()} >
+            onMouseDown={() => new EventUtil({ type: 'RESIZE', app: this.props })} >
           </Button>
         </div>
         <div id="rightSide" style={{ width: this.props.windowSize.rightWidth }}>
@@ -497,7 +430,7 @@ class App extends React.Component {
               lockMap={this.state.lockMap}
               handleLockMap={this.handleLockMap}
               handleShowText={this.handleShowText}
-              onMoveWaypoint={this.onMoveWaypoint}
+              app={this.props}
               onMapLoad={this.handleMapLoad}
               center={this.props.center}
               markerPosition={this.props.markerPosition}
@@ -512,54 +445,29 @@ class App extends React.Component {
         <ModalExtend 
           data={this.state.modalData}
           modalShow={this.modalShow} />
-        <div
-          id="moveText"
-          className="moveText"
-          dangerouslySetInnerHTML={{__html: this.state.showText.text2 === null ? "Точка: " + this.state.showText.text1 : "Точка: " + this.state.showText.text1 + "<br/>" + "Переместить в: " + this.state.showText.text2}}
-          style={{ display: this.state.showText.display }}/>
+        <MoveWindow
+          data={this.props.moveWindow} />
       </div>
     );
   }
 }
 
 const mapStateToProps = (state) => ({
-  routes: state.get('routes').toJS(),
-  checkedRouteIds: state.get('checkedRouteIds').toObject(),
-  openRouteIds: state.get('openRouteIds').toObject(),
-  deliveryDeps: state.get('deliveryDeps').toJS(),
-  activeRouteId: state.get('activeRouteId'),
-  activeWaypointId: state.get('activeWaypointId'),
-  bounds: state.get('bounds'),
-  center: state.get('center').toJS(),
-  isLoading: state.get('isLoading'),
-  windowSize: state.get('windowSize'),
-  modalData: state.get('modalData').toObject(),
-  markers: state.get('markers').toJS(),
+    routes: state.points.routes,
+    checkedRouteIds: state.points.checkedRouteIds,
+    openRouteIds: state.points.openRouteIds,
+    deliveryDeps: state.utils.deliveryDeps,
+    activeRouteId: state.points.activeRouteId,
+    activeWaypointId: state.points.activeWaypointId,
+    bounds: state.points.bounds,
+    center: state.points.center,
+    isLoading: state.utils.isLoading,
+    windowSize: state.utils.windowSize,
+    modalData: state.utils.modalData,
+    markers: state.points.markers,
+    moveWindow: state.moveWin,
 });
 
-const mapDispatchToProps = {
-  fetchRoutes,
-  fetchDeliveryDeps,
-  moveWaypoint,
-  sortRoutes,
-  toggleOpenRoute,
-  setCheckedRoute,
-  setActiveRoute,
-  setActiveWaypoint,
-  optimizeRoutes,
-  optimizeAllRoutes,
-  addRoutes,
-  recycleRoutes,
-  unrecycleRoutes,
-  acceptRoutes,
-  uploadRoutes,
-  newRoutes,
-  changeDeps,
-  uploadXls,
-  reloadRoutes,
-  setSizeBlocks,
-  saveComment,
-  moveWaypoints,
-};
+const mapDispatchToProps = actionsMap;
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
