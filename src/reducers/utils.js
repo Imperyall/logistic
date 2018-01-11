@@ -20,7 +20,7 @@ export default function utils(state = DEFAULT_STATE, action) {
       return {
 				...state,
 				deliveryDeps: action.payload,
-      }
+      };
     }
 
     case BEGIN_LOADING: {
@@ -29,21 +29,21 @@ export default function utils(state = DEFAULT_STATE, action) {
 				: {
         ...state,
         isLoading: action.payload
-      }
+      };
     }
 
     case CHANGE_BLOCKS_SIZE: {
       return {
 				...state,
 				windowSize: action.payload,
-      }
+      };
     }
 
     case SAVE_COMMENT: {
       return {
 				...state,
 				modalData: action.payload,
-      }
+      };
     }
 
     default: {

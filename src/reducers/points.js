@@ -17,11 +17,11 @@ const DEFAULT_STATE = {
   activeRouteId: null,
   activeWaypointId: null,
   bounds: null,
-  markers: {},
+  markers: [],
   center: { lat: 45.0392651, lng: 39.0817043 },
 };
 
-const getRouteBounds = (route) => {
+const getRouteBounds = route => {
   const bounds = new window.google.maps.LatLngBounds();
   if (route.waypoints.length) {
     const points = route.waypoints.map((waypoint) => (
@@ -41,7 +41,7 @@ export default function points(state = DEFAULT_STATE, action) {
       return {
 				...state,
 				routes: action.payload.map((item, index) => ({ ...item, color: getRouteColor(index) })),
-      }
+      };
     }
 
     case TOGGLE_OPEN_ROUTE: {
@@ -51,7 +51,7 @@ export default function points(state = DEFAULT_STATE, action) {
 					...state.openRouteIds,
 					[action.payload]: !state.openRouteIds[action.payload],
 				}
-      }
+      };
     }
 
     case SET_ACTIVE_ROUTE: {
@@ -64,7 +64,7 @@ export default function points(state = DEFAULT_STATE, action) {
 						: null,
 					activeRouteId: value ? state.routes[routeIndex].id : null,
 					activeWaypointId: null,
-				}
+				};
     }
 
     case SET_CHECKED_ROUTE: {
@@ -95,13 +95,13 @@ export default function points(state = DEFAULT_STATE, action) {
 							...newState,
 							checkedRouteIds: { ...newState.checkedRouteIds, id: false },
 							markers: markers,
-            }
+            };
           } else {
             let routes = state.routes, next;
 
             if (routes.length) routes.forEach((item, index) => {
               if (item.id == checks[0]) next = index;
-            })
+            });
 
             let first = Math.min(next, routeIndex),
                 sec = Math.max(next, routeIndex);
@@ -113,7 +113,7 @@ export default function points(state = DEFAULT_STATE, action) {
 									...newState.checkedRouteIds, 
 									[state.routes[i].id]: true,
 								}
-              }
+              };
 
               let wa = state.routes[i].waypoints;
 
@@ -145,21 +145,21 @@ export default function points(state = DEFAULT_STATE, action) {
 					? { ...getRouteBounds(route).toJSON(), hash: getRandomString() }
 					: null,
 				markers: markers,
-      }
+      };
 
       return shi 
 				? newState 
 				: {
 						...newState,
 						checkedRouteIds: { ...newState.checkedRouteIds, [id]: value },
-					}
+					};
     }
 
     case MOVE_WAYPOINT: {
 			return {
 				...state,
 				routes: action.payload,
-			}
+			};
 		}
 
 		case SET_ACTIVE_WAYPOINT: {
@@ -182,14 +182,14 @@ export default function points(state = DEFAULT_STATE, action) {
 						newState = {
 							...newState,
 							center: center,
-						}
+						};
 			//}
 
 			return {
 				...newState,
 				activeWaypointId: array,
 				activeRouteId: null,
-			}
+			};
 		}
 
     default: {

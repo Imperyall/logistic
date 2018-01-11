@@ -1,11 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Table } from 'semantic-ui-react';
 import WaypointRow from './WaypointRow';
 import RouteRow from './RouteRow';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import './Table.scss';
-
 
 class RouteTable extends React.Component {
   render() {
@@ -26,7 +26,7 @@ class RouteTable extends React.Component {
             rowId={route.id}
             handleWindowRoute={this.props.handleWindowRoute}
             ifMoveWaypoint={this.props.ifMoveWaypoint}
-            previewMoveWaypoint={this.props.previewMoveWaypoint}
+            //previewMoveWaypoint={this.props.previewMoveWaypoint}
             endMoveWaypoint={this.props.endMoveWaypoint}
             modalShow={this.props.modalShow}
             onClick={(e) => this.props.setActiveWaypoint(index, index2, !active, e.ctrlKey)}
@@ -73,7 +73,6 @@ class RouteTable extends React.Component {
           onCheckboxChange={(e) => this.props.setCheckedRoute(index, !this.props.checkedRouteIds[route.id], e.shiftKey)}
           active={this.props.activeRouteId === route.id}
           endMoveWaypoint={this.props.endMoveWaypoint}
-          showText={this.props.showText}
           onToggleOpen={(e) => {
             e.stopPropagation();
             this.props.toggleOpenRoute(route.id);
@@ -117,6 +116,22 @@ class RouteTable extends React.Component {
   }
 }
 
+RouteTable.propTypes = {
+  routes:            PropTypes.array,
+  filter:            PropTypes.string,
+  activeWaypointId:  PropTypes.array,
+  handleWindowRoute: PropTypes.func,
+  ifMoveWaypoint:    PropTypes.bool,
+  endMoveWaypoint:   PropTypes.func,
+  modalShow:         PropTypes.func,
+  setActiveWaypoint: PropTypes.func,
+  setActiveRoute:    PropTypes.func,
+  activeRouteId:     PropTypes.array,
+  checkedRouteIds:   PropTypes.object,
+  setCheckedRoute:   PropTypes.func,
+  toggleOpenRoute:   PropTypes.func,
+  openRouteIds:      PropTypes.object,
+};
 
 export default DragDropContext(HTML5Backend)(RouteTable);
 

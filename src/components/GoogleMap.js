@@ -40,7 +40,7 @@ const renderRoutePolylines = (route, activeWaypointId) => route.waypoints.map((w
       waypoint.geometry
         .split(',')
         .map(item => window.google.maps.geometry.encoding.decodePath(item))
-        .reduce((prev, next) => [...prev, ...next], [])
+        .reduce((prev, next) => [...prev, ...next])
     }
   />
 ));

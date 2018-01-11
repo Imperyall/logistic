@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 // import { Table, Popup, Icon } from 'semantic-ui-react';
 import { Table, Icon } from 'semantic-ui-react';
 import { DragSource, DropTarget } from 'react-dnd';
@@ -106,6 +107,20 @@ class Waypoint extends React.Component {
   }
 }
 
+Waypoint.propTypes = {
+  connectDragSource: PropTypes.func,
+  connectDropTarget: PropTypes.func,
+  isDragging:        PropTypes.bool,
+  filter:            PropTypes.string,
+  waypoint:          PropTypes.object,
+  active:            PropTypes.bool,
+  rowTitle:          PropTypes.string,
+  rowId:             PropTypes.number,
+  ifMoveWaypoint:    PropTypes.bool,
+  handleWindowRoute: PropTypes.func,
+  onClick:           PropTypes.func,
+  modalShow:         PropTypes.func,
+};
 
 const x = DropTarget(dragTypes.WAYPOINT, waypointTarget, collect)(Waypoint);
 export default DragSource(dragTypes.WAYPOINT, waypointSource, collect2)(x);

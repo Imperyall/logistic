@@ -28,7 +28,7 @@ export function fetchRoutes(params) {
       }).then(() => {
         dispatch(setSizeBlocks());
       });
-  }
+  };
 }
 
 export function sortRoutes(fetchParams, sortParams) {
@@ -41,7 +41,7 @@ export function sortRoutes(fetchParams, sortParams) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function optimizeRoutes(fetchParams, pk, useDistance) {
@@ -54,7 +54,7 @@ export function optimizeRoutes(fetchParams, pk, useDistance) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function optimizeAllRoutes(fetchParams, pk, opts, useDistance, bases, secondRaces) {
@@ -67,7 +67,7 @@ export function optimizeAllRoutes(fetchParams, pk, opts, useDistance, bases, sec
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function addRoutes(fetchParams) {
@@ -80,7 +80,7 @@ export function addRoutes(fetchParams) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function uploadRoutes(fetchParams, pk) {
@@ -93,7 +93,7 @@ export function uploadRoutes(fetchParams, pk) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function uploadXls(fetchParams, pk) {
@@ -106,7 +106,7 @@ export function uploadXls(fetchParams, pk) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function recycleRoutes(fetchParams, pk) {
@@ -119,7 +119,7 @@ export function recycleRoutes(fetchParams, pk) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function unrecycleRoutes(fetchParams, pk) {
@@ -132,7 +132,7 @@ export function unrecycleRoutes(fetchParams, pk) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function acceptRoutes(fetchParams, pk) {
@@ -145,7 +145,7 @@ export function acceptRoutes(fetchParams, pk) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function reloadRoutes(fetchParams, pk) {
@@ -158,7 +158,7 @@ export function reloadRoutes(fetchParams, pk) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function newRoutes(fetchParams) {
@@ -171,7 +171,7 @@ export function newRoutes(fetchParams) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function fetchDeliveryDeps(params) {
@@ -184,7 +184,7 @@ export function fetchDeliveryDeps(params) {
         
         dispatch({ type: FETCH_DELIVERY_DEPS_SUCCESS, payload: res.data });
       });
-  }
+  };
 }
 
 export function changeDeps(fetchParams, deliveryDeps, pk) {
@@ -197,7 +197,7 @@ export function changeDeps(fetchParams, deliveryDeps, pk) {
         
         dispatch(fetchRoutes(fetchParams));
       });
-  }
+  };
 }
 
 export function moveWaypoint(newStateRoutes) {
@@ -289,7 +289,7 @@ export function setSizeBlocks(di = 33, final = false) { // Функция пер
       document.getElementById('leftSide').style.width = lwi + '%';
       document.getElementById('rightSide').style.width = rwi + '%';
     }
-  }
+  };
 }
 
 export function saveComment(fetchParams, { id, comment }) {
@@ -302,7 +302,7 @@ export function saveComment(fetchParams, { id, comment }) {
         
         dispatch(fetchRoutes(fetchParams));
     });
-  }
+  };
 }
 
 export function moveWaypoints(fetchParams, route, ids) {
@@ -315,7 +315,7 @@ export function moveWaypoints(fetchParams, route, ids) {
         
         dispatch(fetchRoutes(fetchParams));
     });
-  }
+  };
 }
 
 export function handleShowWindow(state) {
@@ -324,7 +324,7 @@ export function handleShowWindow(state) {
       type: HANDLE_VISIBLE,
       payload: state
     });
-  }
+  };
 }
 
 export function handleWindowRoute({ r_id, r_text }) {
@@ -333,7 +333,7 @@ export function handleWindowRoute({ r_id, r_text }) {
       type: HANDLE_WINDOW_ROUTE,
       payload: { r_id, r_text }
     });
-  }
+  };
 }
 
 export function handleWindowPoint({ w_id, w_text }) {
@@ -342,5 +342,5 @@ export function handleWindowPoint({ w_id, w_text }) {
       type: HANDLE_WINDOW_POINT,
       payload: { w_id, w_text }
     });
-  }
+  };
 }

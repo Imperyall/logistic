@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import 'semantic-ui-css/semantic.min.css';
 import { Form, Button, Loader, Dropdown, Input, Icon } from 'semantic-ui-react';
@@ -244,50 +245,43 @@ class App extends React.Component {
                 basic 
                 color="green"
                 icon="plus"
-                onClick={() => this.props.newRoutes(this.getFetchParams())} >
-              </Button>
+                onClick={() => this.props.newRoutes(this.getFetchParams())} />
               <Button 
                 title="Принять"
                 basic 
                 color="green"
                 icon="checkmark"
-                onClick={() => this.props.acceptRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
-              </Button>
+                onClick={() => this.props.acceptRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
               <Button 
                 title="Обновить"
                 basic 
                 color="green"
                 icon="repeat"
-                onClick={() => this.props.reloadRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
-              </Button>
+                onClick={() => this.props.reloadRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
               <Button 
                 title="Загрузить"
                 basic 
                 color="green"
                 icon="download"
-                onClick={() => this.props.addRoutes(this.getFetchParams())} >
-              </Button>
+                onClick={() => this.props.addRoutes(this.getFetchParams())} />
               <Button 
                 title="Выгрузить"
                 basic 
                 color="green"
                 icon="upload"
-                onClick={() => this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
-              </Button>
+                onClick={() => this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
               <Button 
                 title="Удалить"
                 basic 
                 color="red"
                 icon="trash"
-                onClick={() => this.props.recycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
-              </Button>
+                onClick={() => this.props.recycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
               <Button 
                 title="Вернуть"
                 basic 
                 color="red"
                 icon="recycle"
-                onClick={() => this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
-              </Button>
+                onClick={() => this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
               {/*<Form.Button
                 basic
                 color="yellow"
@@ -308,16 +302,16 @@ class App extends React.Component {
                 icon="move"
                 labeled
                 button 
-                className='icon deps-button'>
+                className="icon deps-button">
                 <Dropdown.Menu>
                   <Dropdown.Header content="Базы" />
                   <Dropdown.Divider />
                   {this.props.deliveryDeps.map(option => 
-                    <Dropdown.Item 
+                    (<Dropdown.Item 
                       key={option.id} 
                       value={option.id} 
                       onClick={() => this.props.changeDeps(this.getFetchParams(), [option.id], checkedRouteIdsArray)} 
-                      text={option.title} />
+                      text={option.title} />)
                   )}
                 </Dropdown.Menu>  
               </Dropdown> : null }
@@ -327,16 +321,16 @@ class App extends React.Component {
                 icon="move"
                 labeled
                 button 
-                className='icon move-button'>
+                className="icon move-button">
                 <Dropdown.Menu>
                   <Dropdown.Header content="Маршрут для перемещения" />
                   <Dropdown.Divider />
                   {this.props.routes.map(item => 
-                    <Dropdown.Item 
+                    (<Dropdown.Item 
                       key={item.id} 
                       value={item.id} 
                       onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} 
-                      text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />
+                      text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />)
                   )}
                 </Dropdown.Menu>  
               </Dropdown> : null }
@@ -389,12 +383,12 @@ class App extends React.Component {
           </Form>
           <Input 
             icon
-            placeholder='Фильтр...'
-            size='small'
+            placeholder="Фильтр..."
+            size="small"
             onChange={debounce((e, d) => this.handleFilterValue(d), 500)}
             className="filter-input">
             <input />
-            <Icon name='search' />
+            <Icon name="search" />
           </Input>
           <Table
             routes={[...this.props.routes]}
@@ -411,15 +405,13 @@ class App extends React.Component {
             setActiveWaypoint={this.props.setActiveWaypoint}
             activeRouteId={this.props.activeRouteId}
             activeWaypointId={this.props.activeWaypointId}
-            modalShow={this.modalShow}
-            showText={this.state.showText} />
+            modalShow={this.modalShow} />
         </div>
         <div id="buttonDivider">
           <Button 
             title="Изменить размер"
             icon="resize horizontal"
-            onMouseDown={() => new EventUtil({ type: 'RESIZE', app: this.props })} >
-          </Button>
+            onMouseDown={() => new EventUtil({ type: 'RESIZE', app: this.props })} />
         </div>
         <div id="rightSide" style={{ width: this.props.windowSize.rightWidth }}>
           <div>
@@ -433,8 +425,8 @@ class App extends React.Component {
               app={this.props}
               onMapLoad={this.handleMapLoad}
               center={this.props.center}
-              markerPosition={this.props.markerPosition}
-              markerIcon={this.props.markerIcon}
+              //markerPosition={this.props.markerPosition}
+              //markerIcon={this.props.markerIcon}
               activeWaypointId={this.props.activeWaypointId}
               markers={this.props.markers}
               setActiveWaypoint={this.props.setActiveWaypoint}
@@ -451,6 +443,44 @@ class App extends React.Component {
     );
   }
 }
+
+App.propTypes = {
+  fetchDeliveryDeps: PropTypes.func,
+  fetchRoutes:       PropTypes.func,
+  setSizeBlocks:     PropTypes.func,
+  bounds:            PropTypes.object,
+  saveComment:       PropTypes.func,
+  routes:            PropTypes.array,
+  sortRoutes:        PropTypes.func,
+  moveWaypoint:      PropTypes.func,
+  checkedRouteIds:   PropTypes.object,
+  deliveryDeps:      PropTypes.array,
+  windowSize:        PropTypes.object,
+  isLoading:         PropTypes.bool,
+  optimizeRoutes:    PropTypes.func,
+  optimizeAllRoutes: PropTypes.func,
+  newRoutes:         PropTypes.func,
+  acceptRoutes:      PropTypes.func,
+  reloadRoutes:      PropTypes.func,
+  addRoutes:         PropTypes.func,
+  uploadRoutes:      PropTypes.func,
+  recycleRoutes:     PropTypes.func,
+  unrecycleRoutes:   PropTypes.func,
+  uploadXls:         PropTypes.func,
+  changeDeps:        PropTypes.func,
+  activeWaypointId:  PropTypes.array,
+  toggleOpenRoute:   PropTypes.func,
+  handleWindowRoute: PropTypes.func,
+  moveWindow:        PropTypes.object,
+  setCheckedRoute:   PropTypes.func,
+  openRouteIds:      PropTypes.object,
+  moveWaypoints:     PropTypes.func,
+  setActiveRoute:    PropTypes.func,
+  setActiveWaypoint: PropTypes.func,
+  activeRouteId:     PropTypes.array,
+  center:            PropTypes.object,
+  markers:           PropTypes.array,
+};
 
 const mapStateToProps = (state) => ({
     routes: state.points.routes,

@@ -34,8 +34,8 @@ const collect = connect => ({
   connectDropTarget: connect.dropTarget(),
 });
 
-const RouteRow = (props) => {
-  const Th = (ownProps) => (
+const RouteRow = props => {
+  const Th = ownProps => (
     <Table.HeaderCell
       {...ownProps}
       style={{borderTop: `.1em solid #e0e0e0`, }}

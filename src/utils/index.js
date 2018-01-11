@@ -12,17 +12,17 @@ export const pprintSeconds = seconds => {
 };
 
 export const debounce = (callback, wait, context = this) => {
-  let timeout = null 
-  let callbackArgs = null
+  let timeout = null;
+  let callbackArgs = null;
   
-  const later = () => callback.apply(context, callbackArgs)
+  const later = () => callback.apply(context, callbackArgs);
   
   return function() {
-    callbackArgs = arguments
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-  }
-}
+    callbackArgs = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
 
 export class EventUtil {
   constructor({ type, app, event, param }) {
@@ -119,7 +119,7 @@ export class EventUtil {
   }
 
   map_move() {
-    document.getElementById("moveText").style.top = event.clientY + 15 + "px";
-    document.getElementById("moveText").style.left = event.clientX + 15 + "px";
+    document.getElementById("moveText").style.top = event.pageY + 15 + "px";
+    document.getElementById("moveText").style.left = event.pageX + 15 + "px";
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Table } from 'semantic-ui-react';
 import { pprintSeconds } from '../utils';
-
 
 const Overview = ({ data }) => (
   <Table size="small" compact="very" striped attached="top">
@@ -52,5 +52,8 @@ const Overview = ({ data }) => (
   </Table>
 );
 
+Overview.propTypes = {
+  data: PropTypes.object,
+};
 
 export default Overview;

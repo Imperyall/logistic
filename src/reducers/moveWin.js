@@ -20,21 +20,21 @@ export default function moveWin(state = DEFAULT_STATE, action) {
 						...state,
 						show: action.payload,
 					} 
-				: DEFAULT_STATE
+				: DEFAULT_STATE;
 		}
 
 		case HANDLE_WINDOW_ROUTE: {
 			const { r_id, r_text } = action.payload;
 			return state.r_id === r_id && state.r_text === r_text 
 				? state
-				: { ...state, r_id, r_text } 
+				: { ...state, r_id, r_text };
 		}
 
 		case HANDLE_WINDOW_POINT: {
 			const { w_id, w_text } = action.payload;
 			return state.w_id === w_id && state.w_text === w_text 
 				? state
-				: { ...state, w_id, w_text	}
+				: { ...state, w_id, w_text	};
 		}
 
 		default: {
