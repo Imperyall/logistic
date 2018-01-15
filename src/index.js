@@ -5,6 +5,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import App from './containers/App';
+import './resources/main.scss';
 
 import configureStore from './store/configureStore';
 // require('./favicon.ico'); // Tell webpack to load favicon.ico

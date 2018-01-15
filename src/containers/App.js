@@ -9,7 +9,6 @@ import * as actionsMap from '../actions';
 import { debounce, EventUtil } from '../utils';
 import Table from '../components/Table';
 import Overview from '../components/Overview';
-import '../main.scss';
 import ModalExtend from '../components/ModalExtend';
 import MoveWindow from '../components/MoveWindow';
 
@@ -20,18 +19,18 @@ class App extends React.Component {
     super();
 
     this.handleDeliveryDepsChange = this.handleDeliveryDepsChange.bind(this);
-    this.handleFromDateChange = this.handleFromDateChange.bind(this);
-    this.handleToDateChange = this.handleToDateChange.bind(this);
-    this.handleShowRecycled = this.handleShowRecycled.bind(this);
-    this.handleMoveWaypoint = this.handleMoveWaypoint.bind(this);
-    this.getFetchParams = this.getFetchParams.bind(this);
-    this.handleMapLoad = this.handleMapLoad.bind(this);
-    this.handleUseDistance = this.handleUseDistance.bind(this);
-    this.handleSecondRaces = this.handleSecondRaces.bind(this);
-    this.handleModalShow = this.handleModalShow.bind(this);
-    this.modalShow = this.modalShow.bind(this);
-    this.handleLockMap = this.handleLockMap.bind(this);
-    this.handleFilterValue = this.handleFilterValue.bind(this);
+    this.handleFromDateChange =     this.handleFromDateChange.bind(this);
+    this.handleToDateChange =       this.handleToDateChange.bind(this);
+    this.handleShowRecycled =       this.handleShowRecycled.bind(this);
+    this.handleMoveWaypoint =       this.handleMoveWaypoint.bind(this);
+    this.getFetchParams =           this.getFetchParams.bind(this);
+    this.handleMapLoad =            this.handleMapLoad.bind(this);
+    this.handleUseDistance =        this.handleUseDistance.bind(this);
+    this.handleSecondRaces =        this.handleSecondRaces.bind(this);
+    this.handleModalShow =          this.handleModalShow.bind(this);
+    this.modalShow =                this.modalShow.bind(this);
+    this.handleLockMap =            this.handleLockMap.bind(this);
+    this.handleFilterValue =        this.handleFilterValue.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
@@ -477,12 +476,12 @@ App.propTypes = {
   moveWaypoints:     PropTypes.func,
   setActiveRoute:    PropTypes.func,
   setActiveWaypoint: PropTypes.func,
-  activeRouteId:     PropTypes.array,
+  activeRouteId:     PropTypes.number,
   center:            PropTypes.object,
   markers:           PropTypes.array,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     routes: state.points.routes,
     checkedRouteIds: state.points.checkedRouteIds,
     openRouteIds: state.points.openRouteIds,

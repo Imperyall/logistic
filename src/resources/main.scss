@@ -24,6 +24,7 @@ body {
 	padding: 0;
 	margin: 300px 0 0;
 }
+
 #buttonDivider button:hover {
 	cursor: move;
 }
@@ -54,10 +55,10 @@ body {
 .moveText {
 	position: absolute;
 	border: 1px solid #000;
-    border-radius: 3px;
-    opacity: 0.9;
-    padding: 5px;
-    background-color: #fff;
+  border-radius: 3px;
+  opacity: 0.9;
+  padding: 5px;
+  background-color: #fff;
 }
 
 .filter-input {
@@ -66,4 +67,18 @@ body {
 
 .activeFilter {
 	background: #f9b1b1;
+}
+
+.th-filterable {
+	background-image: url(img/bg.gif);
+  background-repeat: no-repeat;
+  background-position: bottom 1px right -6px;
+}
+
+.th-filterable.asc {
+	background-image: url(img/asc.gif);
+}
+
+.th-filterable.desc {
+	background-image: url(img/desc.gif);
 }

@@ -3,7 +3,7 @@ import { withGoogleMap, GoogleMap, Polyline, Marker } from "react-google-maps";
 import { EventUtil } from '../utils';
 
 
-const decodeLevels = (encodedLevelsString) => {
+const decodeLevels = encodedLevelsString => {
     const decodedLevels = [];
     for (let i = 0; i < encodedLevelsString.length; ++i) {
         const level = encodedLevelsString.charCodeAt(i) - 63;

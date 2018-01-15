@@ -73,22 +73,29 @@ class Waypoint extends React.Component {
     // Should create an issue maybe?
     return connectDragSource(connectDropTarget(
       <tr style={style} 
-          onMouseEnter={() => {  if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: rowId, r_text: rowTitle }); }}
+          onClick={this.props.onClick}
+          onMouseEnter={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: rowId, r_text: rowTitle }); }}
           onMouseLeave={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: 0, r_text: null }); }} >
-        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.num)}><small>{waypoint.num}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick} className={filterClass([waypoint.base, waypoint.id1])}>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.title)}><small>{waypoint.title}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.deliveryDep)}><small>{waypoint.deliveryDep}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick} className={filterClass(waypoint.address)} colSpan="3"><small>{waypoint.address}</small></Table.Cell>
+        <Table.Cell><small>{waypoint.num}</small></Table.Cell>
+        <Table.Cell className={filterClass(waypoint.id1)}>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small></Table.Cell>
+        <Table.Cell className={filterClass(waypoint.title)}><small>{waypoint.title}</small></Table.Cell>
+        <Table.Cell className={filterClass(waypoint.deliveryDep)}><small>{waypoint.deliveryDep}</small></Table.Cell>
+        <Table.Cell className={filterClass(waypoint.address)} colSpan="3"><small>{waypoint.address}</small></Table.Cell>
         {/*<Table.Cell><small>{(+waypoint.weight).toFixed()}</small></Table.Cell>*/}
-        <Table.Cell onClick={this.props.onClick}><small>{waypoint.sku}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{(+waypoint.weight).toFixed()} кг</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{waypoint.volume} м3</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{(+waypoint.pallet).toFixed(2)} паллет</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{(waypoint.distance / 1000).toFixed()} ({waypoint.distance>0 && ((waypoint.distance / waypoint.duration)*3.6).toFixed()} км/ч)</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{`${waypoint.deliveryTimeS} - ${waypoint.deliveryTimeE}`}</small></Table.Cell>
-        <Table.Cell onClick={this.props.onClick}><small>{pprintSeconds(+waypoint.serviceTime)} ({`${waypoint.plannedTimeS} - ${waypoint.plannedTimeE}`})</small></Table.Cell>
-        <Table.Cell onClick={() => this.props.modalShow({ open: true, id: waypoint.id, id1: waypoint.id1, comment: waypoint.comment })} style={{cursor: 'pointer'}} textAlign="center">
+        <Table.Cell><small>{waypoint.sku}</small></Table.Cell>
+        <Table.Cell><small>{(+waypoint.weight).toFixed()} кг</small></Table.Cell>
+        <Table.Cell><small>{waypoint.volume} м3</small></Table.Cell>
+        <Table.Cell><small>{(+waypoint.pallet).toFixed(2)} паллет</small></Table.Cell>
+        <Table.Cell><small>{(waypoint.distance / 1000).toFixed()} ({waypoint.distance>0 && ((waypoint.distance / waypoint.duration)*3.6).toFixed()} км/ч)</small></Table.Cell>
+        <Table.Cell><small>{`${waypoint.deliveryTimeS} - ${waypoint.deliveryTimeE}`}</small></Table.Cell>
+        <Table.Cell><small>{pprintSeconds(+waypoint.serviceTime)} ({`${waypoint.plannedTimeS} - ${waypoint.plannedTimeE}`})</small></Table.Cell>
+        <Table.Cell 
+          onClick={(e) => {
+            e.stopPropagation();
+            this.props.modalShow({ open: true, id: waypoint.id, id1: waypoint.id1, comment: waypoint.comment });
+          }} 
+          style={{cursor: 'pointer'}} 
+          textAlign="center">
           <Icon name="edit" color={waypoint.comment ? 'green' : 'black'} title={waypoint.comment ? waypoint.comment : 'Добавить комментарий'} />
           {/*<Popup*/}
             {/*trigger={*/}
