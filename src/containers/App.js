@@ -18,24 +18,26 @@ class App extends React.Component {
   constructor() {
     super();
 
-    this.handleDeliveryDepsChange = this.handleDeliveryDepsChange.bind(this);
-    this.handleFromDateChange =     this.handleFromDateChange.bind(this);
-    this.handleToDateChange =       this.handleToDateChange.bind(this);
-    this.handleShowRecycled =       this.handleShowRecycled.bind(this);
-    this.handleMoveWaypoint =       this.handleMoveWaypoint.bind(this);
-    this.getFetchParams =           this.getFetchParams.bind(this);
-    this.handleMapLoad =            this.handleMapLoad.bind(this);
-    this.handleUseDistance =        this.handleUseDistance.bind(this);
-    this.handleSecondRaces =        this.handleSecondRaces.bind(this);
-    this.handleModalShow =          this.handleModalShow.bind(this);
-    this.modalShow =                this.modalShow.bind(this);
-    this.handleLockMap =            this.handleLockMap.bind(this);
-    this.handleFilterValue =        this.handleFilterValue.bind(this);
+    this.handleDeliveryDepsChange =  this.handleDeliveryDepsChange.bind(this);
+    this.handleDeliveryZonesChange = this.handleDeliveryZonesChange.bind(this);
+    this.handleFromDateChange =      this.handleFromDateChange.bind(this);
+    this.handleToDateChange =        this.handleToDateChange.bind(this);
+    this.handleShowRecycled =        this.handleShowRecycled.bind(this);
+    this.handleMoveWaypoint =        this.handleMoveWaypoint.bind(this);
+    this.getFetchParams =            this.getFetchParams.bind(this);
+    this.handleMapLoad =             this.handleMapLoad.bind(this);
+    this.handleUseDistance =         this.handleUseDistance.bind(this);
+    this.handleSecondRaces =         this.handleSecondRaces.bind(this);
+    this.handleModalShow =           this.handleModalShow.bind(this);
+    this.modalShow =                 this.modalShow.bind(this);
+    this.handleLockMap =             this.handleLockMap.bind(this);
+    this.handleFilterValue =         this.handleFilterValue.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
       toDate: moment().add(1, 'days').format('YYYY-MM-DD'),
       deliveryDeps: [],
+      deliveryZones: [],
       showRecycled: false,
       isLoading: true,
       useDistance: false,
@@ -74,6 +76,11 @@ class App extends React.Component {
 
   handleDeliveryDepsChange(event, data) {
     this.setState({ deliveryDeps: data.value});
+    this.props.fetchDeliveryZones(data.value);
+  }
+
+  handleDeliveryZonesChange(event, data) {
+    this.setState({ deliveryZones: data.value});
   }
 
   handleFromDateChange(event) {
@@ -154,11 +161,15 @@ class App extends React.Component {
   }
 
   render() {
-    const { fromDate, toDate, deliveryDeps } = this.state;
+    const { fromDate, toDate, deliveryDeps, deliveryZones } = this.state;
     const { checkedRouteIds } = this.props;
     const deliveryDepsOptions = this.props.deliveryDeps.map((option) => ({
       text: option.title, value: option.id
     }));
+
+    const deliveryZonesOptions = this.props.deliveryZones.length !== 0 ? this.props.deliveryZones.map((option) => ({
+      text: option.title, value: option.id
+    })) : [];
 
     let routesForOverview = [...this.props.routes].filter((item) =>
       checkedRouteIds[item.id]
@@ -207,6 +218,7 @@ class App extends React.Component {
                 width={5}
                 options={deliveryDepsOptions}
                 search
+                closeOnChange={true}
                 multiple />
               <Form.Input
                 placeholder="Начало периода"
@@ -220,6 +232,7 @@ class App extends React.Component {
                 onChange={this.handleToDateChange} />
               <Form.Checkbox 
                 id="chk1" 
+                className="vertical-auto"
                 checked={this.state.showRecycled} 
                 onChange={this.handleShowRecycled} 
                 label="Удаленные" />
@@ -231,14 +244,31 @@ class App extends React.Component {
             </Form.Group>
           </Form>
           <Form size="tiny">
-            <Form.Group>
+            <div className="field">
+              {this.props.deliveryZones.length !== 0 ? 
+                <Dropdown 
+                  placeholder="Зоны" 
+                  fluid 
+                  onChange={this.handleDeliveryZonesChange}
+                  multiple 
+                  selection 
+                  className="deliveryZones"
+                  options={deliveryZonesOptions} />
+                : null }
+            {/*<Form.Group>
               <Form.Button
                 basic
                 color="blue"
                 onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance)} >
                 {/*<Icon name="road" color="blue" />*/}
-                Оптимизировать
-              </Form.Button>
+                {/*Оптимизировать
+              </Form.Button>*/}
+              <Button 
+                title="Оптимизировать маршруты"
+                basic 
+                color="blue"
+                icon="random"
+                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance)} />
               <Button 
                 title="Новый"
                 basic 
@@ -281,6 +311,17 @@ class App extends React.Component {
                 color="red"
                 icon="recycle"
                 onClick={() => this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
+              <Button 
+                title="Выгрузить отчет"
+                basic 
+                color="green"
+                icon="file excel outline"
+                onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} />
+              <Button 
+                title="Выгрузить из 1C"
+                basic 
+                color="green"
+                onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones })} >1C</Button>
               {/*<Form.Button
                 basic
                 color="yellow"
@@ -288,20 +329,21 @@ class App extends React.Component {
                 {/*<Icon name="home" color="yellow" />*/}
                 {/*Сменить базу*/}
               {/*</Form.Button>*/}
-              <Form.Button
+              
+              {/*<Form.Button
                 basic
                 color="green"
                 onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} >
                 {/*<Icon name="table" color="green" />*/}
-                Выгрузить отчет
-              </Form.Button>
+                {/*Выгрузить отчет
+              </Form.Button>*/}
               {checkedRouteIdsArray.length !== 0 ? 
               <Dropdown 
                 text="Сменить базу" 
-                icon="move"
+                // icon="move"
                 labeled
                 button 
-                className="icon deps-button">
+                className="icon basic violet move-button">
                 <Dropdown.Menu>
                   <Dropdown.Header content="Базы" />
                   <Dropdown.Divider />
@@ -317,10 +359,10 @@ class App extends React.Component {
               {this.props.activeWaypointId !== null ? 
               <Dropdown 
                 text="Переместить" 
-                icon="move"
+                // icon="move"
                 labeled
                 button 
-                className="icon move-button">
+                className="icon basic violet move-button">
                 <Dropdown.Menu>
                   <Dropdown.Header content="Маршрут для перемещения" />
                   <Dropdown.Divider />
@@ -333,7 +375,8 @@ class App extends React.Component {
                   )}
                 </Dropdown.Menu>  
               </Dropdown> : null }
-            </Form.Group>
+            </div>
+            {/*</Form.Group>*/}
             <Form.Group>
               <Form.Button
                 basic
@@ -369,12 +412,14 @@ class App extends React.Component {
               <Form.Checkbox 
                 slider 
                 id="chk2" 
+                className="vertical-auto"
                 checked={this.state.useDistance} 
                 onChange={this.handleUseDistance} 
                 label="время/км" />
               <Form.Checkbox 
                 slider 
                 id="chk3" 
+                className="vertical-auto"
                 checked={this.state.secondRaces} 
                 onChange={this.handleSecondRaces} 
                 label="Повторный выезд" />
@@ -446,14 +491,17 @@ class App extends React.Component {
 App.propTypes = {
   fetchDeliveryDeps: PropTypes.func,
   fetchRoutes:       PropTypes.func,
-  setSizeBlocks:     PropTypes.func,
+  fetchDeliveryZones:PropTypes.func,
+  getDeliveryZones:  PropTypes.func,
   bounds:            PropTypes.object,
   saveComment:       PropTypes.func,
+  setSizeBlocks:     PropTypes.func,
   routes:            PropTypes.array,
   sortRoutes:        PropTypes.func,
   moveWaypoint:      PropTypes.func,
   checkedRouteIds:   PropTypes.object,
   deliveryDeps:      PropTypes.array,
+  deliveryZones:     PropTypes.array,
   windowSize:        PropTypes.object,
   isLoading:         PropTypes.bool,
   optimizeRoutes:    PropTypes.func,
@@ -466,6 +514,7 @@ App.propTypes = {
   recycleRoutes:     PropTypes.func,
   unrecycleRoutes:   PropTypes.func,
   uploadXls:         PropTypes.func,
+  upload1C:          PropTypes.func,
   changeDeps:        PropTypes.func,
   activeWaypointId:  PropTypes.array,
   toggleOpenRoute:   PropTypes.func,
@@ -482,19 +531,20 @@ App.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    routes: state.points.routes,
-    checkedRouteIds: state.points.checkedRouteIds,
-    openRouteIds: state.points.openRouteIds,
-    deliveryDeps: state.utils.deliveryDeps,
-    activeRouteId: state.points.activeRouteId,
+    routes:           state.points.routes,
+    checkedRouteIds:  state.points.checkedRouteIds,
+    openRouteIds:     state.points.openRouteIds,
+    deliveryDeps:     state.utils.deliveryDeps,
+    deliveryZones:    state.utils.deliveryZones,
+    activeRouteId:    state.points.activeRouteId,
     activeWaypointId: state.points.activeWaypointId,
-    bounds: state.points.bounds,
-    center: state.points.center,
-    isLoading: state.utils.isLoading,
-    windowSize: state.utils.windowSize,
-    modalData: state.utils.modalData,
-    markers: state.points.markers,
-    moveWindow: state.moveWin,
+    bounds:           state.points.bounds,
+    center:           state.points.center,
+    isLoading:        state.utils.isLoading,
+    windowSize:       state.utils.windowSize,
+    modalData:        state.utils.modalData,
+    markers:          state.points.markers,
+    moveWindow:       state.moveWin,
 });
 
 const mapDispatchToProps = actionsMap;

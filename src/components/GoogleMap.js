@@ -67,12 +67,8 @@ export default withGoogleMap((props) => (
                 <Marker
                   key={`m${waypoint.id}`}
                   position={pos}
-                  onMouseOver={() => {
-                    props.handleLockMap(true);
-                  }}
-                  onMouseOut={() => {
-                    props.handleLockMap(false);
-                  }}
+                  onMouseOver={() => props.handleLockMap(true)}
+                  onMouseOut={() => props.handleLockMap(false)}
                   onMouseDown={() => new EventUtil({ type: 'GOOGLEMAP', app: props.app, param: { w_text: waypoint.id1, w_id: waypoint.id } })}
                   onClick={() => props.setActiveWaypoint(rIndex, index, true)}
                   icon={`https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=${index + 1}|${color.slice(1)}|000000`}

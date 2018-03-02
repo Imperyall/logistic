@@ -2,6 +2,7 @@ import axios from 'axios';
 import {
   FETCH_ROUTES_SUCCESS,
   FETCH_DELIVERY_DEPS_SUCCESS,
+  FETCH_DELIVERY_ZONES_SUCCESS,
   MOVE_WAYPOINT,
   TOGGLE_OPEN_ROUTE,
   SET_CHECKED_ROUTE,
@@ -187,6 +188,23 @@ export function fetchDeliveryDeps(params) {
   };
 }
 
+export function fetchDeliveryZones(params) {
+  return (dispatch) => {
+    //dispatch(beginLoading());
+
+    if (!params.length) {
+      return dispatch({ type: FETCH_DELIVERY_ZONES_SUCCESS, payload: [] });
+    } else {
+      return axios.get(`${BASE_URL}/deliveryzones/get/`, { params: { delivery_deps_list: params } })
+        .then((res) => {
+          console.log('[RESPONSE][fetchDeliveryZones]', res.data.length ? res.data : 'null');
+          
+          dispatch({ type: FETCH_DELIVERY_ZONES_SUCCESS, payload: res.data });
+        });
+    }
+  };
+}
+
 export function changeDeps(fetchParams, deliveryDeps, pk) {
   return (dispatch) => {
     dispatch(beginLoading());
@@ -342,5 +360,18 @@ export function handleWindowPoint({ w_id, w_text }) {
       type: HANDLE_WINDOW_POINT,
       payload: { w_id, w_text }
     });
+  };
+}
+
+export function upload1C(fetchParams, { deliveryDeps, deliveryZones }) {
+  return (dispatch) => {
+    dispatch(beginLoading());
+
+    return axios.get(`${BASE_URL}/routes/copy_loaded/`, { params: { deliveryDeps, deliveryZones } })
+      .then((res) => {
+        console.log('[RESPONSE][copy_loaded]', res.data.length ? res.data : 'null');
+        
+        dispatch(fetchRoutes(fetchParams));
+      });
   };
 }

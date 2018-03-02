@@ -1,5 +1,6 @@
 import {
 	FETCH_DELIVERY_DEPS_SUCCESS,
+  FETCH_DELIVERY_ZONES_SUCCESS,
 	BEGIN_LOADING,
 	CHANGE_BLOCKS_SIZE,
 	SAVE_COMMENT,
@@ -9,6 +10,7 @@ import {
 
 const DEFAULT_STATE = {
   deliveryDeps: [],
+  deliveryZones: [],
   isLoading: false,
   windowSize: {},
   modalData: {},
@@ -18,8 +20,15 @@ export default function utils(state = DEFAULT_STATE, action) {
 	switch (action.type) {
 		case FETCH_DELIVERY_DEPS_SUCCESS: {
       return {
-				...state,
-				deliveryDeps: action.payload,
+        ...state,
+        deliveryDeps: action.payload,
+      };
+    }
+
+    case FETCH_DELIVERY_ZONES_SUCCESS: {
+      return {
+        ...state,
+        deliveryZones: action.payload,
       };
     }
 

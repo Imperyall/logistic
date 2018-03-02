@@ -39,17 +39,13 @@ body {
 	right: 10px;
 }
 
-.move-button, .deps-button {
+.move-button {
 	max-height: 35px;
 	min-width: 173px;
 }
 
-.deps-button {
-	color: green;
-}
-
-.move-button {
-	color: blue;
+.move-button i {
+	background-color: rgba(123, 40, 219, 0.12)!important;
 }
 
 .moveText {
@@ -62,7 +58,7 @@ body {
 }
 
 .filter-input {
-	width: 497px;
+	width: 100%;
 }
 
 .activeFilter {
@@ -81,4 +77,13 @@ body {
 
 .th-filterable.desc {
 	background-image: url(img/desc.gif);
+}
+
+.vertical-auto {
+	margin: auto 0!important;
+}
+
+.deliveryZones {
+	width: 270px!important;
+  margin-bottom: 10px;
 }
