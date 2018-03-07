@@ -17,7 +17,8 @@ import {
 import BASE_URL from '../constants/baseURL';
 
 const logging = (fun, response) => {
-  process.env.NODE_ENV === 'development' && console.log(`[RESPONSE][${fun}]`, response.data.length ? response.data : 'null');
+  //process.env.NODE_ENV === 'development' && 
+  console.log(`[RESPONSE][${fun}]`, response.data.length ? response.data : 'null');
 };
 
 export function fetchRoutes(params) {

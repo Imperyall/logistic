@@ -2,6 +2,10 @@ body {
   pointer-events: auto;
 }
 
+button {
+  max-height: 36px;
+}
+
 #page {
 	padding: 10px 0 10px;
 }
@@ -85,5 +89,14 @@ body {
 
 .deliveryZones {
 	width: 270px!important;
-  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+.nomarginl {
+  margin-left: 0px!important;
+}
+
+.table > * > tr > * {
+  line-height: 1.4285em!important;
+  font-size: 13px!important;
 }

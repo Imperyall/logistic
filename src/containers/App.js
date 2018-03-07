@@ -244,7 +244,7 @@ class App extends React.Component {
             </Form.Group>
           </Form>
           <Form size="tiny">
-            <div className="field">
+            <div className="fields nomarginl">
               {this.props.deliveryZones.length !== 0 ? 
                 <Dropdown 
                   placeholder="Зоны" 
