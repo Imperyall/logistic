@@ -16,13 +16,17 @@ import {
 } from '../constants/actionTypes';
 import BASE_URL from '../constants/baseURL';
 
+const logging = (fun, response) => {
+  process.env.NODE_ENV === 'development' && console.log(`[RESPONSE][${fun}]`, response.data.length ? response.data : 'null');
+};
+
 export function fetchRoutes(params) {
   return (dispatch) => {
     dispatch(beginLoading());
 
     return axios.get(`${BASE_URL}/routes/get/`, { params })
       .then((res) => {
-        console.log('[RESPONSE][fetchRoutes]', res.data.length ? res.data : 'null');
+        logging('fetchRoutes', res);
         
         dispatch({ type: FETCH_ROUTES_SUCCESS, payload: res.data });
         dispatch(beginLoading(false));
@@ -38,7 +42,7 @@ export function sortRoutes(fetchParams, sortParams) {
 
     return axios.get(`${BASE_URL}/routes/sort/`, { params: sortParams })
       .then((res) => {
-        console.log('[RESPONSE][sortRoutes]', res.data.length ? res.data : 'null');
+        logging('sortRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -51,7 +55,7 @@ export function optimizeRoutes(fetchParams, pk, useDistance) {
 
     return axios.get(`${BASE_URL}/routes/optimize/`, { params: { pk, useDistance } })
       .then((res) => {
-        console.log('[RESPONSE][optimizeRoutes]', res.data.length ? res.data : 'null');
+        logging('optimizeRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -64,7 +68,7 @@ export function optimizeAllRoutes(fetchParams, pk, opts, useDistance, bases, sec
 
     return axios.get(`${BASE_URL}/routes/all/`, { params: { pk, opts, useDistance, bases, secondRaces } })
       .then((res) => {
-        console.log('[RESPONSE][optimizeAllRoutes]', res.data.length ? res.data : 'null');
+        logging('optimizeAllRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -77,7 +81,7 @@ export function addRoutes(fetchParams) {
 
     return axios.get(`${BASE_URL}/routes/add/`)
       .then((res) => {
-        console.log('[RESPONSE][addRoutes]', res.data.length ? res.data : 'null');
+        logging('addRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -90,10 +94,10 @@ export function uploadRoutes(fetchParams, pk) {
 
     return axios.get(`${BASE_URL}/routes/upload/`, { params: { pk } })
     .then((res) => {
-      console.log('[RESPONSE][uploadRoutes]', res.data.length ? res.data : 'null');
+      logging('uploadRoutes', res);
         
-        dispatch(fetchRoutes(fetchParams));
-      });
+      dispatch(fetchRoutes(fetchParams));
+    });
   };
 }
 
@@ -103,7 +107,7 @@ export function uploadXls(fetchParams, pk) {
 
     return axios.get(`${BASE_URL}/routes/uploadXls/`, { params: { pk } })
       .then((res) => {
-        console.log('[RESPONSE][uploadXls]', res.data.length ? res.data : 'null');
+        logging('uploadXls', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -116,7 +120,7 @@ export function recycleRoutes(fetchParams, pk) {
 
     return axios.get(`${BASE_URL}/routes/recycle/`, { params: { pk } })
       .then((res) => {
-        console.log('[RESPONSE][recycleRoutes]', res.data.length ? res.data : 'null');
+        logging('recycleRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -129,7 +133,7 @@ export function unrecycleRoutes(fetchParams, pk) {
 
     return axios.get(`${BASE_URL}/routes/unrecycle/`, { params: { pk } })
       .then((res) => {
-        console.log('[RESPONSE][unrecycleRoutes]', res.data.length ? res.data : 'null');
+        logging('unrecycleRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -142,7 +146,7 @@ export function acceptRoutes(fetchParams, pk) {
 
     return axios.get(`${BASE_URL}/routes/accept/`, { params: { pk } })
       .then((res) => {
-        console.log('[RESPONSE][acceptRoutes]', res.data.length ? res.data : 'null');
+        logging('acceptRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -155,7 +159,7 @@ export function reloadRoutes(fetchParams, pk) {
 
     return axios.get(`${BASE_URL}/routes/reload/`, { params: { pk } })
       .then((res) => {
-        console.log('[RESPONSE][reloadRoutes]', res.data.length ? res.data : 'null');
+        logging('reloadRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -168,7 +172,7 @@ export function newRoutes(fetchParams) {
 
     return axios.get(`${BASE_URL}/routes/new/`)
       .then((res) => {
-        console.log('[RESPONSE][newRoutes]', res.data.length ? res.data : 'null');
+        logging('newRoutes', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -181,7 +185,7 @@ export function fetchDeliveryDeps(params) {
 
     return axios.get(`${BASE_URL}/deliverydeps/get/`, { params })
       .then((res) => {
-        console.log('[RESPONSE][fetchDeliveryDeps]', res.data.length ? res.data : 'null');
+        logging('fetchDeliveryDeps', res);
         
         dispatch({ type: FETCH_DELIVERY_DEPS_SUCCESS, payload: res.data });
       });
@@ -197,7 +201,7 @@ export function fetchDeliveryZones(params) {
     } else {
       return axios.get(`${BASE_URL}/deliveryzones/get/`, { params: { delivery_deps_list: params } })
         .then((res) => {
-          console.log('[RESPONSE][fetchDeliveryZones]', res.data.length ? res.data : 'null');
+          logging('fetchDeliveryZones', res);
           
           dispatch({ type: FETCH_DELIVERY_ZONES_SUCCESS, payload: res.data });
         });
@@ -211,7 +215,7 @@ export function changeDeps(fetchParams, deliveryDeps, pk) {
 
     return axios.get(`${BASE_URL}/routes/changedeps/`, { params: { deliveryDeps, pk } })
       .then((res) => {
-        console.log('[RESPONSE][changeDeps]', res.data.length ? res.data : 'null');
+        logging('changeDeps', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -316,7 +320,7 @@ export function saveComment(fetchParams, { id, comment }) {
 
     return axios.get(`${BASE_URL}/index/save/`, { params: { id, comment } })
       .then((res) => {
-        console.log('[RESPONSE][saveComment]', res.data.length ? res.data : 'null');
+        logging('saveComment', res);
         
         dispatch(fetchRoutes(fetchParams));
     });
@@ -329,7 +333,7 @@ export function moveWaypoints(fetchParams, route, ids) {
 
     return axios.get(`${BASE_URL}/index/move/`, { params: { route, ids } })
       .then((res) => {
-        console.log('[RESPONSE][moveWaypoints]', res.data.length ? res.data : 'null');
+        logging('moveWaypoints', res);
         
         dispatch(fetchRoutes(fetchParams));
     });
@@ -369,7 +373,7 @@ export function upload1C(fetchParams, { deliveryDeps, deliveryZones }) {
 
     return axios.get(`${BASE_URL}/routes/copy_loaded/`, { params: { deliveryDeps, deliveryZones } })
       .then((res) => {
-        console.log('[RESPONSE][copy_loaded]', res.data.length ? res.data : 'null');
+        logging('copy_loaded', res);
         
         dispatch(fetchRoutes(fetchParams));
       });
