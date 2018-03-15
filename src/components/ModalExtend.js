@@ -39,12 +39,17 @@ class ModalExtend extends React.Component {
 		const title = 'Комментарий № ' + id1;
 
 		return (
-			<Modal size="small" open={open}>
+			<Modal 
+				style={{ 'height': '300px' }} 
+				size="small" 
+				open={open} >
 				<Modal.Header>{title}</Modal.Header>
-				<Modal.Content>
+				<Modal.Content className="nomargin">
 					<Form>
 						<TextArea 
+							autoHeight
 							placeholder="Введите комментарий"
+							style={{ 'height': '135px' }}
 							value={this.state.text}
 							onChange={this.handleChangeTextEvent}
 							maxLength="140" />
