@@ -45,7 +45,7 @@ class ModalExtend extends React.Component {
 				open={open} >
 				<Modal.Header>{title}</Modal.Header>
 				<Modal.Content className="nomargin">
-					<Form>
+					<Form className="nomargin">
 						<TextArea 
 							autoHeight
 							placeholder="Введите комментарий"

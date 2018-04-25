@@ -18,7 +18,7 @@ import BASE_URL from '../constants/baseURL';
 
 const logging = (fun, response) => {
   //process.env.NODE_ENV === 'development' && 
-  console.log(`[RESPONSE][${fun}]`, response.data.length ? response.data : 'null');
+  console.log(`[RESPONSE][${fun}]`, response.data && response.data.length ? response.data : 'null');
 };
 
 export function fetchRoutes(params) {
@@ -50,11 +50,11 @@ export function sortRoutes(fetchParams, sortParams) {
   };
 }
 
-export function optimizeRoutes(fetchParams, pk, useDistance) {
+export function optimizeRoutes(fetchParams, pk) {
   return (dispatch) => {
     dispatch(beginLoading());
 
-    return axios.get(`${BASE_URL}/routes/optimize/`, { params: { pk, useDistance } })
+    return axios.get(`${BASE_URL}/routes/optimize/`, { params: { pk } })
       .then((res) => {
         logging('optimizeRoutes', res);
         
@@ -63,11 +63,11 @@ export function optimizeRoutes(fetchParams, pk, useDistance) {
   };
 }
 
-export function optimizeAllRoutes(fetchParams, pk, opts, useDistance, bases, secondRaces) {
+export function optimizeAllRoutes(fetchParams, pk, opts, bases) {
   return (dispatch) => {
     dispatch(beginLoading());
 
-    return axios.get(`${BASE_URL}/routes/all/`, { params: { pk, opts, useDistance, bases, secondRaces } })
+    return axios.get(`${BASE_URL}/routes/all/`, { params: { pk, opts, bases } })
       .then((res) => {
         logging('optimizeAllRoutes', res);
         
@@ -368,11 +368,11 @@ export function handleWindowPoint({ w_id, w_text }) {
   };
 }
 
-export function upload1C(fetchParams, { deliveryDeps, deliveryZones }) {
+export function upload1C(fetchParams, { deliveryDeps, deliveryZones, options }) {
   return (dispatch) => {
     dispatch(beginLoading());
 
-    return axios.get(`${BASE_URL}/routes/copy_loaded/`, { params: { deliveryDeps, deliveryZones } })
+    return axios.get(`${BASE_URL}/routes/copy_loaded/`, { params: { deliveryDeps, deliveryZones, options } })
       .then((res) => {
         logging('copy_loaded', res);
         

@@ -25,11 +25,14 @@ const getRouteBounds = route => {
   const bounds = new window.google.maps.LatLngBounds();
   if (route.waypoints.length) {
     const points = route.waypoints.map((waypoint) => (
-      waypoint.geometry.split(',').map(item => window.google.maps.geometry.encoding.decodePath(item)).reduce((prev, next) => [...prev, ...next])
+      waypoint.geometry 
+      ? waypoint.geometry.split(',').map(item => window.google.maps.geometry.encoding.decodePath(item)).reduce((prev, next) => [...prev, ...next])
+      : [new window.google.maps.LatLng(waypoint.lat, waypoint.lng)]
     )).reduce((prev, next) => [...prev, ...next]);
 
     points.forEach((point) => bounds.extend(point));
   }
+
   return bounds;
 };
 

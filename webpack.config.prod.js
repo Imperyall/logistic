@@ -20,7 +20,7 @@ export default {
   entry: path.resolve(__dirname, 'src/index'),
   target: 'web', // necessary per https://webpack.github.io/docs/testing.html#compile-and-test
   output: {
-    path: path.resolve(__dirname, '../navyp/waypoints/static/routes/'),
+    path: path.resolve(__dirname, '../nav/waypoints/static/routes/'),
     publicPath: '/static/routes/',
     filename: '[name].js'
   },

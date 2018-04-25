@@ -26,8 +26,6 @@ class App extends React.Component {
     this.handleMoveWaypoint =        this.handleMoveWaypoint.bind(this);
     this.getFetchParams =            this.getFetchParams.bind(this);
     this.handleMapLoad =             this.handleMapLoad.bind(this);
-    this.handleUseDistance =         this.handleUseDistance.bind(this);
-    this.handleSecondRaces =         this.handleSecondRaces.bind(this);
     this.handleModalShow =           this.handleModalShow.bind(this);
     this.modalShow =                 this.modalShow.bind(this);
     this.handleLockMap =             this.handleLockMap.bind(this);
@@ -40,8 +38,6 @@ class App extends React.Component {
       deliveryZones: [],
       showRecycled: false,
       isLoading: true,
-      useDistance: false,
-      secondRaces: false,
       modalData: {},
       lockMap: false,
       filterValue: '',
@@ -94,18 +90,6 @@ class App extends React.Component {
   handleShowRecycled() {
     this.setState((prevState) => { 
       return { showRecycled: !prevState.showRecycled };
-    });
-  }
-
-  handleUseDistance() {
-    this.setState((prevState) => { 
-      return { useDistance: !prevState.useDistance };
-    });
-  }
-
-  handleSecondRaces() {
-    this.setState((prevState) => { 
-      return { secondRaces: !prevState.secondRaces };
     });
   }
 
@@ -243,9 +227,9 @@ class App extends React.Component {
               </Form.Button>
             </Form.Group>
           </Form>
-          <Form size="tiny">
-            <div className="fields nomarginl">
-              {this.props.deliveryZones.length !== 0 ? 
+          {this.props.deliveryZones.length !== 0 ? 
+            <Form size="tiny">
+              <div className="fields nomarginl">
                 <Dropdown 
                   placeholder="Зоны" 
                   fluid 
@@ -254,12 +238,16 @@ class App extends React.Component {
                   selection 
                   className="deliveryZones"
                   options={deliveryZonesOptions} />
-                : null }
+              </div>
+            </Form>
+          : null }
+          <Form size="tiny">
+            <div className="fields nomarginl">
             {/*<Form.Group>
               <Form.Button
                 basic
                 color="blue"
-                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance)} >
+                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
                 {/*<Icon name="road" color="blue" />*/}
                 {/*Оптимизировать
               </Form.Button>*/}
@@ -268,7 +256,7 @@ class App extends React.Component {
                 basic 
                 color="blue"
                 icon="random"
-                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray, this.state.useDistance)} />
+                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
               <Button 
                 title="Новый"
                 basic 
@@ -317,11 +305,27 @@ class App extends React.Component {
                 color="green"
                 icon="file excel outline"
                 onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} />
-              <Button 
-                title="Выгрузить из 1C"
-                basic 
-                color="green"
-                onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones })} >1C</Button>
+              <Dropdown 
+                className="ui basic orange button"
+                text="Загрузить РНК" >
+                <Dropdown.Menu>
+                  <Dropdown.Item text="Все документы" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '1' })} />
+                  <Dropdown.Item text="Документы не в маршрутах" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '2' })} />
+                  <Dropdown.Item text="Не выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '3' })} />
+                  <Dropdown.Item text="Выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '4' })} />
+                  <Dropdown.Item text="Документы у сотрудников" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '5' })} />
+                </Dropdown.Menu> 
+              </Dropdown>
+              <Dropdown 
+                className="ui basic icon orange button"
+                title="Оптимизировать маршруты"
+                icon="play" >
+                <Dropdown.Menu>
+                  <Dropdown.Item text="Закрепленные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', 'one')} />
+                  <Dropdown.Item text="Минимальные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', 'one')} />
+                  <Dropdown.Item text="Виртуальные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', 'one')} />
+                </Dropdown.Menu> 
+              </Dropdown>
               {/*<Form.Button
                 basic
                 color="yellow"
@@ -339,8 +343,7 @@ class App extends React.Component {
               </Form.Button>*/}
               {checkedRouteIdsArray.length !== 0 ? 
               <Dropdown 
-                text="Сменить базу" 
-                // icon="move"
+                text="Сменить базу"
                 labeled
                 button 
                 className="icon basic violet move-button">
@@ -376,54 +379,6 @@ class App extends React.Component {
                 </Dropdown.Menu>  
               </Dropdown> : null }
             </div>
-            {/*</Form.Group>*/}
-            <Form.Group>
-              <Form.Button
-                basic
-                color="blue"
-                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'one', this.state.secondRaces)} >
-                {/*<Icon name="truck" color="blue"/>
-                <Icon name="truck" color="blue" inverted/>*/}
-                Закрепленные ТС
-              </Form.Button>
-              <Form.Button
-                basic
-                color="blue"
-                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', this.state.useDistance, 'one', this.state.secondRaces)} >
-                {/*<Icon name="truck" color="blue"/>
-                <Icon name="plus" color="blue"/>
-                <Icon name="truck" color="blue" inverted/>*/}
-                Минимальные ТС
-              </Form.Button>
-              <Form.Button
-                basic
-                color="blue"
-                onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', this.state.useDistance, 'one', this.state.secondRaces)} >
-                {/*<Icon name="truck" color="blue" inverted/>*/}
-                Виртуальные ТС
-              </Form.Button>
-              {/* <Form.Button
-              //   basic
-              //   color="blue"
-              //   onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', this.state.useDistance, 'nobase', this.state.secondRaces)} >
-              //   <Icon name="home" color="blue" inverted/>
-              //   Без баз
-              // </Form.Button> */}
-              <Form.Checkbox 
-                slider 
-                id="chk2" 
-                className="vertical-auto"
-                checked={this.state.useDistance} 
-                onChange={this.handleUseDistance} 
-                label="время/км" />
-              <Form.Checkbox 
-                slider 
-                id="chk3" 
-                className="vertical-auto"
-                checked={this.state.secondRaces} 
-                onChange={this.handleSecondRaces} 
-                label="Повторный выезд" />
-            </Form.Group>
           </Form>
           <Input 
             icon
