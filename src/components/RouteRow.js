@@ -107,9 +107,10 @@ const RouteRow = props => {
       <Th className={getFilterClass('id1')}
           onClick={(e) => ifOpen && props.clickFilter(route.id, 'id1', e)}
           title={ifOpen && titleText.id1}>
-        {route.autocreated && <Icon name="desktop" color="blue" />}
-        <span/>{route.recycled && <Icon name="remove circle" color="red" />}
-        <span/>{route.accepted && <Icon name="check circle" color="green" />}
+        {route.autocreated && <span><Icon name="desktop" color="blue" /></span>}
+        {route.recycled && <span><Icon name="remove circle" color="red" /></span>}
+        {route.accepted && <span><Icon name="check circle" color="yellow" /></span>}
+        {route.accepted_tabs && <span><Icon name="check circle" color="green" /></span>}
         <small>
           {rowTitle}
           {/*{route.collectionRem && "Непопавшие РНК "}*/}

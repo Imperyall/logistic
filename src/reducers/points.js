@@ -5,6 +5,7 @@ import {
 	SET_CHECKED_ROUTE,
 	MOVE_WAYPOINT,
 	SET_ACTIVE_WAYPOINT,
+  CLEAR_SELECTION,
 } from '../constants/actionTypes';
 import { getRouteColor } from '../utils';
 // import { fromJS, Map, List } from 'immutable';
@@ -54,6 +55,20 @@ export default function points(state = DEFAULT_STATE, action) {
 					...state.openRouteIds,
 					[action.payload]: !state.openRouteIds[action.payload],
 				}
+      };
+    }
+
+    case CLEAR_SELECTION: {
+      let checked = state.checkedRouteIds;
+
+      for (let i in checked) {
+        if (action.payload.indexOf(i) !== -1) checked[i] = false;
+      }
+
+      return {
+        ...state,
+        checkedRouteIds: checked,
+        bounds: null,
       };
     }
 

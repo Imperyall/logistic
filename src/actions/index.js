@@ -13,6 +13,7 @@ import {
   HANDLE_VISIBLE,
   HANDLE_WINDOW_ROUTE,
   HANDLE_WINDOW_POINT,
+  CLEAR_SELECTION,
 } from '../constants/actionTypes';
 import BASE_URL from '../constants/baseURL';
 
@@ -122,6 +123,7 @@ export function recycleRoutes(fetchParams, pk) {
     return axios.get(`${BASE_URL}/routes/recycle/`, { params: { pk } })
       .then((res) => {
         logging('recycleRoutes', res);
+        dispatch(clearSelection(pk));
         
         dispatch(fetchRoutes(fetchParams));
       });
@@ -281,6 +283,15 @@ export function setNewBlocksSize(data) {
   return (dispatch) => {
     dispatch({
       type: CHANGE_BLOCKS_SIZE,
+      payload: data
+    });
+  };
+}
+
+export function clearSelection(data) {
+  return (dispatch) => {
+    dispatch({
+      type: CLEAR_SELECTION,
       payload: data
     });
   };
