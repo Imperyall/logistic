@@ -8,7 +8,7 @@ import { pprintSeconds } from '../utils';
 
 const waypointTarget = {
   canDrop() {
-    return false;
+    return true;
   },
   hover(props, monitor) {
     const dragIndex = monitor.getItem().index;
@@ -31,9 +31,9 @@ const waypointTarget = {
 };
 
 const waypointSource = {
-  beginDrag: ({id, index}) => ({id, index}),
+  beginDrag: (props) => ({ ...props }),
   endDrag(props, monitor) {
-    if (!monitor.didDrop()) {
+    if (monitor.didDrop()) {
       props.endMoveWaypoint(props.index, monitor.getItem().index);
     }
   },
@@ -77,7 +77,7 @@ class Waypoint extends React.Component {
           onMouseEnter={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: rowId, r_text: rowTitle }); }}
           onMouseLeave={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: 0, r_text: null }); }} >
         <Table.Cell><small>{waypoint.num}</small></Table.Cell>
-        <Table.Cell className={filterClass(waypoint.id1)}>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small></Table.Cell>
+        <Table.Cell className={filterClass(waypoint.id1)}>{waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.id1}</small><br/><span style={{ fontSize: '8px' }}>({waypoint.id})</span></Table.Cell>
         <Table.Cell className={filterClass(waypoint.title)}><small>{waypoint.title}</small></Table.Cell>
         <Table.Cell className={filterClass(waypoint.deliveryDep)}><small>{waypoint.deliveryDep}</small></Table.Cell>
         <Table.Cell className={filterClass(waypoint.address)} colSpan="3"><small>{waypoint.address}</small></Table.Cell>

@@ -11,8 +11,12 @@ import Table from '../components/Table';
 import Overview from '../components/Overview';
 import ModalExtend from '../components/ModalExtend';
 import MoveWindow from '../components/MoveWindow';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 
 const { LatLngBounds } = window.google.maps;
+
+window.notify = NotificationManager;
 
 class App extends React.Component {
   constructor() {
@@ -264,18 +268,24 @@ class App extends React.Component {
                 icon="plus"
                 onClick={() => this.props.newRoutes(this.getFetchParams())} />
               <Button 
-                title="Принять"
+                title="Принять для 1C"
                 basic 
-                color="green"
+                color="yellow"
                 icon="checkmark"
                 onClick={() => this.props.acceptRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
               <Button 
-                title="Обновить"
+                title="Исключить из 1C"
+                basic 
+                color="yellow"
+                icon="dont"
+                onClick={() => this.props.unacceptRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
+              <Button 
+                title="Пересчитать маршрут"
                 basic 
                 color="green"
                 icon="repeat"
                 onClick={() => this.props.reloadRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
-              <Button 
+              {/*<Button 
                 title="Загрузить"
                 basic 
                 color="green"
@@ -286,7 +296,7 @@ class App extends React.Component {
                 basic 
                 color="green"
                 icon="upload"
-                onClick={() => this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
+                onClick={() => this.props.uploadRoutes(this.getFetchParams(), checkedRouteIdsArray)} />*/}
               <Button 
                 title="Удалить"
                 basic 
@@ -438,6 +448,7 @@ class App extends React.Component {
           modalShow={this.modalShow} />
         <MoveWindow
           data={this.props.moveWindow} />
+        <NotificationContainer/>
       </div>
     );
   }
@@ -463,6 +474,7 @@ App.propTypes = {
   optimizeAllRoutes: PropTypes.func,
   newRoutes:         PropTypes.func,
   acceptRoutes:      PropTypes.func,
+  unacceptRoutes:    PropTypes.func,
   reloadRoutes:      PropTypes.func,
   addRoutes:         PropTypes.func,
   uploadRoutes:      PropTypes.func,

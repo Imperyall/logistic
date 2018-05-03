@@ -103,3 +103,9 @@ button {
 .nomargin {
   margin: 0!important;
 }
+.main-table {
+  max-height: 700px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: block;
+}
