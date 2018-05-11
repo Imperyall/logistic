@@ -1,6 +1,8 @@
 import {
 	FETCH_DELIVERY_DEPS_SUCCESS,
   FETCH_DELIVERY_ZONES_SUCCESS,
+  FETCH_CARS,
+  FETCH_DRIVERS,
 	BEGIN_LOADING,
 	CHANGE_BLOCKS_SIZE,
 	SAVE_COMMENT,
@@ -11,7 +13,9 @@ import {
 const DEFAULT_STATE = {
   deliveryDeps: [],
   deliveryZones: [],
-  isLoading: false,
+  drivers: [],
+  cars: [],
+  isLoading: [],
   windowSize: {},
   modalData: {},
 };
@@ -32,12 +36,33 @@ export default function utils(state = DEFAULT_STATE, action) {
       };
     }
 
-    case BEGIN_LOADING: {
-      return state.isLoading && action.payload
-				? state 
-				: {
+    case FETCH_CARS: {
+      return {
         ...state,
-        isLoading: action.payload
+        cars: action.payload,
+      };
+    }
+
+    case FETCH_DRIVERS: {
+      return {
+        ...state,
+        drivers: action.payload,
+      };
+    }
+
+    case BEGIN_LOADING: {
+      const { add, end } = action.payload;
+      let newLoading = state.isLoading;
+
+      if (end) {
+        newLoading.splice(state.isLoading.indexOf(end), 1);
+      } else if (add) {
+        newLoading.push(add);
+      }
+
+      return {
+        ...state,
+        isLoading: newLoading,
       };
     }
 

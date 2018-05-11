@@ -2,6 +2,7 @@ import colors from '../constants/colors';
 import moment from 'moment';
 
 export const getRouteColor = routeIndex => colors[routeIndex % colors.length];
+export const getRandomString = () => Math.random().toString(36).substring(7);
 
 export const pprintSeconds = seconds => {
   const d = moment.duration(seconds, 'seconds');
@@ -93,8 +94,8 @@ export class EventUtil {
     window._sb = window.innerWidth - document.body.clientWidth;
     const wi = window.innerWidth - 20 - window._sb;
     prop = Number((wi - nx)/wi*100);
-    if (prop > 50) {
-      prop = 50;
+    if (prop > 43) {
+      prop = 43;
     } else if (prop < 20) {
       prop = 20;
     }

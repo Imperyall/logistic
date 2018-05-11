@@ -177,7 +177,7 @@ class RouteTable extends React.Component {
             {/*<Table.HeaderCell className="table-th"></Table.HeaderCell>*/}
           </Table.Row>
         </Table.Header>
-        <Table.Body>
+        <Table.Body className="table-style">
           {routeTables}
         </Table.Body>
       </Table>

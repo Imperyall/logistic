@@ -3,6 +3,8 @@ import {
   FETCH_ROUTES_SUCCESS,
   FETCH_DELIVERY_DEPS_SUCCESS,
   FETCH_DELIVERY_ZONES_SUCCESS,
+  FETCH_CARS,
+  FETCH_DRIVERS,
   MOVE_WAYPOINT,
   TOGGLE_OPEN_ROUTE,
   SET_CHECKED_ROUTE,
@@ -16,12 +18,13 @@ import {
   CLEAR_SELECTION,
 } from '../constants/actionTypes';
 import BASE_URL from '../constants/baseURL';
+import { getRandomString } from '../utils';
 
 const logging = (fun, response) => {
   //process.env.NODE_ENV === 'development' && 
   console.log(`[RESPONSE][${fun}]`, response.data && response.data.length ? response.data : 'null');
 
-  if (response.data.code) notify(response.data.code, response.data.text);
+  if (response.data && response.data.hasOwnProperty('code')) notify(response.data.code, response.data.text);
 };
 
 const notify = (type, text) => {
@@ -42,25 +45,24 @@ const notify = (type, text) => {
 };
 
 export const fetchRoutes = (params) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/get/`, { params })
     .then((res) => {
       logging('fetchRoutes', res);
       
       dispatch({ type: FETCH_ROUTES_SUCCESS, payload: res.data });
-      dispatch(beginLoading(false));
     }).then(() => {
-      // window.notify.info('Info message');
       dispatch(setSizeBlocks());
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const sortRoutes = (fetchParams, sortParams) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/sort/`, { params: sortParams })
     .then((res) => {
@@ -69,13 +71,13 @@ export const sortRoutes = (fetchParams, sortParams) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const optimizeRoutes = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
-
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
+  
   return axios.get(`${BASE_URL}/routes/optimize/`, { params: { pk } })
     .then((res) => {
       logging('optimizeRoutes', res);
@@ -83,12 +85,12 @@ export const optimizeRoutes = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const optimizeAllRoutes = (fetchParams, pk, opts, bases) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/all/`, { params: { pk, opts, bases } })
     .then((res) => {
@@ -97,12 +99,12 @@ export const optimizeAllRoutes = (fetchParams, pk, opts, bases) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const addRoutes = (fetchParams) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/add/`)
     .then((res) => {
@@ -111,12 +113,12 @@ export const addRoutes = (fetchParams) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const uploadRoutes = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/upload/`, { params: { pk } })
     .then((res) => {
@@ -125,12 +127,12 @@ export const uploadRoutes = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const uploadXls = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/uploadXls/`, { params: { pk } })
     .then((res) => {
@@ -139,12 +141,12 @@ export const uploadXls = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const recycleRoutes = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/recycle/`, { params: { pk } })
     .then((res) => {
@@ -154,12 +156,12 @@ export const recycleRoutes = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const unrecycleRoutes = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/unrecycle/`, { params: { pk } })
     .then((res) => {
@@ -168,12 +170,12 @@ export const unrecycleRoutes = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const acceptRoutes = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/accept/`, { params: { pk } })
     .then((res) => {
@@ -182,12 +184,12 @@ export const acceptRoutes = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const unacceptRoutes = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/unaccept/`, { params: { pk } })
     .then((res) => {
@@ -196,12 +198,12 @@ export const unacceptRoutes = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const reloadRoutes = (fetchParams, pk) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/reload/`, { params: { pk } })
     .then((res) => {
@@ -210,12 +212,12 @@ export const reloadRoutes = (fetchParams, pk) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const newRoutes = (fetchParams) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/new/`)
     .then((res) => {
@@ -224,12 +226,12 @@ export const newRoutes = (fetchParams) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const fetchDeliveryDeps = (params) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/deliverydeps/get/`, { params })
     .then((res) => {
@@ -238,14 +240,44 @@ export const fetchDeliveryDeps = (params) => dispatch => {
       dispatch({ type: FETCH_DELIVERY_DEPS_SUCCESS, payload: res.data });
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
+};
+
+export const fetchCars = ({ delivery_dep, date_to, date_from }) => dispatch => {
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
+
+  return axios.get(`${BASE_URL}/mon/cars/`, { params: { format: 'json', delivery_dep, date_to, date_from } })
+    .then((res) => {
+      logging('fetchCars', res);
+      
+      dispatch({ type: FETCH_CARS, payload: res.data });
+    }).catch(res => {
+      logging('error', res);
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
+};
+
+export const fetchDrivers = (params) => dispatch => {
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
+
+  return axios.get(`${BASE_URL}/driver/`, { params: { format: 'json' } })
+    .then((res) => {
+      logging('fetchDrivers', res);
+      
+      dispatch({ type: FETCH_DRIVERS, payload: res.data });
+    }).catch(res => {
+      logging('error', res);
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const fetchDeliveryZones = (params) => dispatch => {
-  //dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   if (!params.length) {
+    dispatch(beginLoading({ end: eventId }));
+
     return dispatch({ type: FETCH_DELIVERY_ZONES_SUCCESS, payload: [] });
   } else {
     return axios.get(`${BASE_URL}/deliveryzones/get/`, { params: { delivery_deps_list: params } })
@@ -255,23 +287,22 @@ export const fetchDeliveryZones = (params) => dispatch => {
         dispatch({ type: FETCH_DELIVERY_ZONES_SUCCESS, payload: res.data });
       }).catch(res => {
         logging('error', res);
-        dispatch(beginLoading(false));
-      });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
   }
 };
 
-export const changeDeps = (fetchParams, deliveryDeps, pk) => dispatch => {
-  dispatch(beginLoading());
+export const routeEdit = ({ fetchParams, deliveryDeps, pk, car, driver }) => dispatch => {
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
-  return axios.get(`${BASE_URL}/routes/changedeps/`, { params: { deliveryDeps, pk } })
+  return axios.get(`${BASE_URL}/routes/edit/`, { params: { deliveryDeps, pk, car, driver } })
     .then((res) => {
-      logging('changeDeps', res);
+      logging('routeEdit', res);
       
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const moveWaypoint = (newStateRoutes) => dispatch => {
@@ -358,31 +389,31 @@ export const setSizeBlocks = (di = 33, final = false) => dispatch => { // Фун
 };
 
 export const saveComment = (fetchParams, { id, comment }) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/index/save/`, { params: { id, comment } })
     .then((res) => {
       logging('saveComment', res);
-      
+
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const moveWaypoints = (fetchParams, route, ids) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/index/move/`, { params: { route, ids } })
     .then((res) => {
       logging('moveWaypoints', res);
-      
+
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
 export const handleShowWindow = (state) => dispatch => {
@@ -407,15 +438,15 @@ export const handleWindowPoint = ({ w_id, w_text }) => dispatch => {
 };
 
 export const upload1C = (fetchParams, { deliveryDeps, deliveryZones, options }) => dispatch => {
-  dispatch(beginLoading());
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
   return axios.get(`${BASE_URL}/routes/copy_loaded/`, { params: { deliveryDeps, deliveryZones, options } })
     .then((res) => {
       logging('copy_loaded', res);
-      
+
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-      dispatch(beginLoading(false));
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };

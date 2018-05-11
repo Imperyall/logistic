@@ -120,7 +120,12 @@ const RouteRow = props => {
       <Th className={getFilterClass('title')}
           onClick={(e) => ifOpen && props.clickFilter(route.id, 'title', e)}
           title={ifOpen && titleText.title}>
-        <small>{!route.bin && <span>{route.car && route.car} {route.car && route.car_brand}</span>} {route.car_virtual && "виртуальный"}</small>
+        <small style={{ display: 'grid' }}>
+          {!route.bin && <span className="nowr">{route.car}</span>}
+          {!route.bin && <span className="nowr">{route.car && route.car_brand}</span>}
+          {!route.bin && <span className="nowr">{route.car_driver}</span>} 
+          {route.car_virtual && <span>виртуальный</span>}
+        </small>
       </Th>
       <Th>{!route.bin && <small> База: {route.deliveryDeps} </small>}<br/></Th>
       <Th>{!route.bin && <small> Логист: {route.author} </small>}</Th>

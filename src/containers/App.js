@@ -34,6 +34,7 @@ class App extends React.Component {
     this.modalShow =                 this.modalShow.bind(this);
     this.handleLockMap =             this.handleLockMap.bind(this);
     this.handleFilterValue =         this.handleFilterValue.bind(this);
+    this.handleSearchDropdown =      this.handleSearchDropdown.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
@@ -45,11 +46,13 @@ class App extends React.Component {
       modalData: {},
       lockMap: false,
       filterValue: '',
+      searchDropdown: '',
     };
   }
 
   componentDidMount() {
     this.props.fetchDeliveryDeps(this.getFetchParams());
+    this.props.fetchDrivers();
     this.props.fetchRoutes(this.getFetchParams());
     this.props.setSizeBlocks();
   }
@@ -64,14 +67,22 @@ class App extends React.Component {
     }
   }
 
-  getFetchParams() {
+  getFetchParams(newFormat) {
     const { fromDate, toDate, deliveryDeps, showRecycled } = this.state;
-    return {
+    let res;
+
+    res = newFormat ? {
+      date_from: moment(fromDate).format('YYYY-MM-DDTHH:mm:ss'),
+      date_to: moment(toDate).format('YYYY-MM-DDTHH:mm:ss'),
+      delivery_dep: deliveryDeps.length > 0 ? deliveryDeps : 'null',
+    } : {
       fromDate: moment(fromDate).format('DD.MM.YYYY'),
       toDate: moment(toDate).format('DD.MM.YYYY'),
       deliveryDeps: deliveryDeps.length > 0 ? deliveryDeps.join(',') : 'null',
       showRecycled,
     };
+
+    return res;
   }
 
   handleDeliveryDepsChange(event, data) {
@@ -105,6 +116,11 @@ class App extends React.Component {
 
   handleFilterValue(data) {
     this.setState({ filterValue: data.value});
+  }
+
+  handleSearchDropdown(event) {
+    const value = event ? event.target.value : '';
+    this.setState({ searchDropdown: value });
   }
 
   handleLockMap(state) {
@@ -255,12 +271,18 @@ class App extends React.Component {
                 {/*<Icon name="road" color="blue" />*/}
                 {/*Оптимизировать
               </Form.Button>*/}
-              <Button 
-                title="Оптимизировать маршруты"
-                basic 
-                color="blue"
-                icon="random"
-                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
+              <Dropdown 
+                style={{ minWidth: '156px' }}
+                className="ui basic orange button button-div"
+                text="Загрузить РНК" >
+                <Dropdown.Menu>
+                  <Dropdown.Item text="Все документы" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '1' })} />
+                  <Dropdown.Item text="Документы не в маршрутах" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '2' })} />
+                  <Dropdown.Item text="Не выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '3' })} />
+                  <Dropdown.Item text="Выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '4' })} />
+                  <Dropdown.Item text="Документы у сотрудников" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '5' })} />
+                </Dropdown.Menu> 
+              </Dropdown>
               <Button 
                 title="Новый"
                 basic 
@@ -315,20 +337,15 @@ class App extends React.Component {
                 color="green"
                 icon="file excel outline"
                 onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} />
-              <Dropdown 
-                className="ui basic orange button"
-                text="Загрузить РНК" >
-                <Dropdown.Menu>
-                  <Dropdown.Item text="Все документы" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '1' })} />
-                  <Dropdown.Item text="Документы не в маршрутах" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '2' })} />
-                  <Dropdown.Item text="Не выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '3' })} />
-                  <Dropdown.Item text="Выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '4' })} />
-                  <Dropdown.Item text="Документы у сотрудников" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '5' })} />
-                </Dropdown.Menu> 
-              </Dropdown>
-              <Dropdown 
-                className="ui basic icon orange button"
+              <Button 
                 title="Оптимизировать маршруты"
+                basic 
+                color="blue"
+                icon="random"
+                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
+              <Dropdown 
+                className="ui basic icon orange button button-div"
+                title="Решить транспортную задачу"
                 icon="play" >
                 <Dropdown.Menu>
                   <Dropdown.Item text="Закрепленные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', 'one')} />
@@ -336,6 +353,7 @@ class App extends React.Component {
                   <Dropdown.Item text="Виртуальные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', 'one')} />
                 </Dropdown.Menu> 
               </Dropdown>
+
               {/*<Form.Button
                 basic
                 color="yellow"
@@ -352,30 +370,89 @@ class App extends React.Component {
                 {/*Выгрузить отчет
               </Form.Button>*/}
               {checkedRouteIdsArray.length !== 0 ? 
-              <Dropdown 
-                text="Сменить базу"
-                labeled
-                button 
-                className="icon basic violet move-button">
-                <Dropdown.Menu>
-                  <Dropdown.Header content="Базы" />
-                  <Dropdown.Divider />
-                  {this.props.deliveryDeps.map(option => 
-                    (<Dropdown.Item 
-                      key={option.id} 
-                      value={option.id} 
-                      onClick={() => this.props.changeDeps(this.getFetchParams(), [option.id], checkedRouteIdsArray)} 
-                      text={option.title} />)
-                  )}
-                </Dropdown.Menu>  
-              </Dropdown> : null }
+              <div className="nowr">
+                <Dropdown 
+                  className="ui icon basic teal button button-div"
+                  title="Сменить водителя"
+                  icon="drivers license" >
+                  <Dropdown.Menu>
+                    <Input 
+                      onClick={e => e.stopPropagation()} 
+                      onChange={this.handleSearchDropdown} 
+                      value={this.state.searchDropdown} 
+                      icon='search' 
+                      placeholder="Водители" 
+                      iconPosition='left' 
+                      className='search' />
+                    <Dropdown.Divider />
+                    {this.props.drivers.length !== 0 
+                      && this.props.drivers.filter(option => option.name.indexOf(this.state.searchDropdown) !== -1 )
+                        .map(option => 
+                          (<Dropdown.Item 
+                            key={option.id} 
+                            value={option.id} 
+                            onClick={() => {
+                              this.handleSearchDropdown();
+                              this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, driver: option.id })
+                            }} 
+                            text={option.name} />)
+                        )}
+                  </Dropdown.Menu> 
+                </Dropdown>
+                <Dropdown 
+                  className="ui icon basic teal button button-div"
+                  title="Сменить ТС"
+                  onClick={() => {
+                    this.handleSearchDropdown();
+                    this.props.fetchCars(this.getFetchParams(true));
+                  }}
+                  icon="car" >
+                  <Dropdown.Menu>
+                    <Input 
+                      onClick={e => e.stopPropagation()} 
+                      onChange={this.handleSearchDropdown} 
+                      value={this.state.searchDropdown} 
+                      icon='search' 
+                      placeholder="ТС" 
+                      iconPosition='left' 
+                      className='search' />
+                    <Dropdown.Divider />
+                    {this.props.cars.length !== 0 
+                      && this.props.cars.filter(option => option.brand.indexOf(this.state.searchDropdown) !== -1 || option.number.indexOf(this.state.searchDropdown) !== -1 )
+                        .map(option => 
+                          (<Dropdown.Item 
+                            key={option.id} 
+                            value={option.id} 
+                            onClick={() => {
+                              this.handleSearchDropdown();
+                              this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, car: option.id })
+                            }} 
+                            text={`${option.brand} - ${option.number}`} />)
+                        )}
+                  </Dropdown.Menu> 
+                </Dropdown>
+                <Dropdown 
+                  className="ui icon basic violet button button-div"
+                  title="Сменить базу"
+                  icon="home" >
+                  <Dropdown.Menu>
+                    <Dropdown.Header content="Базы:" />
+                    <Dropdown.Divider />
+                    {this.props.deliveryDeps.map(option => 
+                      (<Dropdown.Item 
+                        key={option.id} 
+                        value={option.id} 
+                        onClick={() => this.props.routeEdit({ fetchParams: this.getFetchParams(), deliveryDeps: [option.id], pk: checkedRouteIdsArray })} 
+                        text={option.title} />)
+                    )}
+                  </Dropdown.Menu> 
+                </Dropdown>
+              </div> : null }
               {this.props.activeWaypointId !== null ? 
               <Dropdown 
-                text="Переместить" 
-                // icon="move"
-                labeled
-                button 
-                className="icon basic violet move-button">
+                className="ui icon basic violet button button-div"
+                title="Переместить в другой маршрут" 
+                icon="move" >
                 <Dropdown.Menu>
                   <Dropdown.Header content="Маршрут для перемещения" />
                   <Dropdown.Divider />
@@ -467,6 +544,8 @@ App.propTypes = {
   moveWaypoint:      PropTypes.func,
   checkedRouteIds:   PropTypes.object,
   deliveryDeps:      PropTypes.array,
+  cars:              PropTypes.array,
+  drivers:           PropTypes.array,
   deliveryZones:     PropTypes.array,
   windowSize:        PropTypes.object,
   isLoading:         PropTypes.bool,
@@ -482,7 +561,7 @@ App.propTypes = {
   unrecycleRoutes:   PropTypes.func,
   uploadXls:         PropTypes.func,
   upload1C:          PropTypes.func,
-  changeDeps:        PropTypes.func,
+  routeEdit:         PropTypes.func,
   activeWaypointId:  PropTypes.array,
   toggleOpenRoute:   PropTypes.func,
   handleWindowRoute: PropTypes.func,
@@ -507,11 +586,13 @@ const mapStateToProps = state => ({
     activeWaypointId: state.points.activeWaypointId,
     bounds:           state.points.bounds,
     center:           state.points.center,
-    isLoading:        state.utils.isLoading,
+    isLoading:        state.utils.isLoading.length !== 0,
     windowSize:       state.utils.windowSize,
     modalData:        state.utils.modalData,
     markers:          state.points.markers,
     moveWindow:       state.moveWin,
+    cars:             state.utils.cars,
+    drivers:          state.utils.drivers,
 });
 
 const mapDispatchToProps = actionsMap;
