@@ -15,6 +15,7 @@ import {NotificationContainer, NotificationManager} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 
 const { LatLngBounds } = window.google.maps;
+const defaultTime = moment().hour(8).minutes(0).seconds(0).format('YYYY-MM-DDTHH:mm:ss');
 
 window.notify = NotificationManager;
 
@@ -35,6 +36,9 @@ class App extends React.Component {
     this.handleLockMap =             this.handleLockMap.bind(this);
     this.handleFilterValue =         this.handleFilterValue.bind(this);
     this.handleSearchDropdown =      this.handleSearchDropdown.bind(this);
+    this.handleStartRouteTime =      this.handleStartRouteTime.bind(this);
+    this.handleStartRouteDate =      this.handleStartRouteDate.bind(this);
+    this.handleStartRouteClear =     this.handleStartRouteClear.bind(this);
 
     this.state = {
       fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
@@ -47,6 +51,7 @@ class App extends React.Component {
       lockMap: false,
       filterValue: '',
       searchDropdown: '',
+      startRoute: defaultTime,
     };
   }
 
@@ -116,6 +121,42 @@ class App extends React.Component {
 
   handleFilterValue(data) {
     this.setState({ filterValue: data.value});
+  }
+
+  handleStartRouteTime(event) {
+    const time = event.target.value;
+
+    if (moment(time, "HH:mm").isValid()) {
+      const value = {
+        'hour': moment(time, "HH:mm").get('hour'), 
+        'minute': moment(time, "HH:mm").get('minute'),
+        'year': moment(this.state.startRoute).get('year'),
+        'month': moment(this.state.startRoute).get('month'),
+        'date': moment(this.state.startRoute).get('date'),
+      };
+
+      this.setState({ startRoute: moment().set(value).format('YYYY-MM-DDTHH:mm:ss') });
+    }
+  }
+
+  handleStartRouteDate(event) {
+    const time = event.target.value;
+    
+    if (moment(time).isValid()) {
+      const value = {
+        'hour': moment(this.state.startRoute, "HH:mm").get('hour'), 
+        'minute': moment(this.state.startRoute, "HH:mm").get('minute'),
+        'year': moment(time).get('year'),
+        'month': moment(time).get('month'),
+        'date': moment(time).get('date'),
+      };
+
+      this.setState({ startRoute: moment().set(value).format('YYYY-MM-DDTHH:mm:ss') });
+    }
+  }
+
+  handleStartRouteClear() {
+    this.setState({ startRoute: defaultTime });
   }
 
   handleSearchDropdown(event) {
@@ -380,23 +421,24 @@ class App extends React.Component {
                       onClick={e => e.stopPropagation()} 
                       onChange={this.handleSearchDropdown} 
                       value={this.state.searchDropdown} 
-                      icon='search' 
+                      icon="search"
                       placeholder="Водители" 
-                      iconPosition='left' 
-                      className='search' />
-                    <Dropdown.Divider />
-                    {this.props.drivers.length !== 0 
-                      && this.props.drivers.filter(option => option.name.indexOf(this.state.searchDropdown) !== -1 )
-                        .map(option => 
-                          (<Dropdown.Item 
-                            key={option.id} 
-                            value={option.id} 
-                            onClick={() => {
-                              this.handleSearchDropdown();
-                              this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, driver: option.id })
-                            }} 
-                            text={option.name} />)
-                        )}
+                      iconPosition="left"
+                      className="search" />
+                    <Dropdown.Menu scrolling>
+                      {this.props.drivers.length !== 0 
+                        && this.props.drivers.filter(option => option.name.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 )
+                          .map(option => 
+                            (<Dropdown.Item 
+                              key={option.id} 
+                              value={option.id} 
+                              onClick={() => {
+                                this.handleSearchDropdown();
+                                this.props.routeEdit({ pk: checkedRouteIdsArray, driver: option.id });
+                              }} 
+                              text={option.name} />)
+                          )}
+                    </Dropdown.Menu> 
                   </Dropdown.Menu> 
                 </Dropdown>
                 <Dropdown 
@@ -412,24 +454,58 @@ class App extends React.Component {
                       onClick={e => e.stopPropagation()} 
                       onChange={this.handleSearchDropdown} 
                       value={this.state.searchDropdown} 
-                      icon='search' 
+                      icon="search"
                       placeholder="ТС" 
-                      iconPosition='left' 
-                      className='search' />
-                    <Dropdown.Divider />
-                    {this.props.cars.length !== 0 
-                      && this.props.cars.filter(option => option.brand.indexOf(this.state.searchDropdown) !== -1 || option.number.indexOf(this.state.searchDropdown) !== -1 )
-                        .map(option => 
-                          (<Dropdown.Item 
-                            key={option.id} 
-                            value={option.id} 
-                            onClick={() => {
-                              this.handleSearchDropdown();
-                              this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, car: option.id })
-                            }} 
-                            text={`${option.brand} - ${option.number}`} />)
-                        )}
+                      iconPosition="left"
+                      className="search" />
+                    <Dropdown.Menu scrolling>
+                      {this.props.cars.length !== 0 && !this.props.isLoading
+                        && this.props.cars.filter(option => option.brand.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 || option.number.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 )
+                          .map(option => 
+                            (<Dropdown.Item 
+                              key={option.id} 
+                              value={option.id} 
+                              onClick={() => {
+                                this.handleSearchDropdown();
+                                this.props.routeEdit({ pk: checkedRouteIdsArray, car: option.id });
+                              }} 
+                              text={`${option.brand} - ${option.number}`} />)
+                          )}
+                      </Dropdown.Menu>
                   </Dropdown.Menu> 
+                </Dropdown>
+                <Dropdown
+                  className="ui icon basic teal button button-div"
+                  title="Сменить время начала маршрута"
+                  icon="time">
+                  <Dropdown.Menu className="change-time-div">
+                    <div>
+                      <span>Время отправки</span>
+                      <Input 
+                        onClick={e => e.stopPropagation()} 
+                        className="input-datetime-div" 
+                        onChange={this.handleStartRouteTime}
+                        value={moment(this.state.startRoute).format('HH:mm')}
+                        type="time" />
+                    </div>
+                    <div>
+                      <span>Дата отправки</span>
+                      <Input 
+                        onClick={e => e.stopPropagation()} 
+                        onChange={this.handleStartRouteDate}
+                        value={moment(this.state.startRoute).format('YYYY-MM-DD')}
+                        className="input-datetime-div" 
+                        type="date" />
+                    </div>
+                    <div>
+                      <Button 
+                        color="green"
+                        onClick={() => {
+                          this.handleStartRouteClear();
+                          this.props.routeEdit({ plannedTimeS: this.state.startRoute, pk: checkedRouteIdsArray });
+                        }} >Принять</Button>
+                    </div>
+                  </Dropdown.Menu>
                 </Dropdown>
                 <Dropdown 
                   className="ui icon basic violet button button-div"
@@ -437,14 +513,15 @@ class App extends React.Component {
                   icon="home" >
                   <Dropdown.Menu>
                     <Dropdown.Header content="Базы:" />
-                    <Dropdown.Divider />
-                    {this.props.deliveryDeps.map(option => 
-                      (<Dropdown.Item 
-                        key={option.id} 
-                        value={option.id} 
-                        onClick={() => this.props.routeEdit({ fetchParams: this.getFetchParams(), deliveryDeps: [option.id], pk: checkedRouteIdsArray })} 
-                        text={option.title} />)
-                    )}
+                    <Dropdown.Menu scrolling>
+                      {this.props.deliveryDeps.map(option => 
+                        (<Dropdown.Item 
+                          key={option.id} 
+                          value={option.id} 
+                          onClick={() => this.props.routeEdit({ fetchParams: this.getFetchParams(), deliveryDeps: [option.id], pk: checkedRouteIdsArray })} 
+                          text={option.title} />)
+                      )}
+                    </Dropdown.Menu>
                   </Dropdown.Menu> 
                 </Dropdown>
               </div> : null }
@@ -455,14 +532,15 @@ class App extends React.Component {
                 icon="move" >
                 <Dropdown.Menu>
                   <Dropdown.Header content="Маршрут для перемещения" />
-                  <Dropdown.Divider />
-                  {this.props.routes.map(item => 
-                    (<Dropdown.Item 
-                      key={item.id} 
-                      value={item.id} 
-                      onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} 
-                      text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />)
-                  )}
+                  <Dropdown.Menu scrolling>
+                    {this.props.routes.map(item => 
+                      (<Dropdown.Item 
+                        key={item.id} 
+                        value={item.id} 
+                        onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} 
+                        text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />)
+                    )}
+                  </Dropdown.Menu> 
                 </Dropdown.Menu>  
               </Dropdown> : null }
             </div>
@@ -533,7 +611,9 @@ class App extends React.Component {
 
 App.propTypes = {
   fetchDeliveryDeps: PropTypes.func,
+  fetchDrivers:      PropTypes.func,
   fetchRoutes:       PropTypes.func,
+  fetchCars:         PropTypes.func,
   fetchDeliveryZones:PropTypes.func,
   getDeliveryZones:  PropTypes.func,
   bounds:            PropTypes.object,

@@ -257,7 +257,7 @@ export const fetchCars = ({ delivery_dep, date_to, date_from }) => dispatch => {
     }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
-export const fetchDrivers = (params) => dispatch => {
+export const fetchDrivers = () => dispatch => {
   const eventId = getRandomString();
   dispatch(beginLoading({ add: eventId }));
 
@@ -271,7 +271,7 @@ export const fetchDrivers = (params) => dispatch => {
     }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
-export const fetchDeliveryZones = (params) => dispatch => {
+export const fetchDeliveryZones = params => dispatch => {
   const eventId = getRandomString();
   dispatch(beginLoading({ add: eventId }));
 
@@ -291,11 +291,11 @@ export const fetchDeliveryZones = (params) => dispatch => {
   }
 };
 
-export const routeEdit = ({ fetchParams, deliveryDeps, pk, car, driver }) => dispatch => {
+export const routeEdit = ({ fetchParams, deliveryDeps, pk, car, driver, plannedTimeS }) => dispatch => {
   const eventId = getRandomString();
   dispatch(beginLoading({ add: eventId }));
 
-  return axios.get(`${BASE_URL}/routes/edit/`, { params: { deliveryDeps, pk, car, driver } })
+  return axios.get(`${BASE_URL}/routes/edit/`, { params: { deliveryDeps, pk, car, driver, plannedTimeS } })
     .then((res) => {
       logging('routeEdit', res);
       

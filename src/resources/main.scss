@@ -118,3 +118,24 @@ button, .button-div {
 .nowr {
   white-space: nowrap;
 }
+.change-time-div {
+  padding: 10px!important;
+  min-width: 300px!important;
+}
+.change-time-div > div:not(:last-child) {
+  margin-bottom: 5px!important;
+  min-height: 40px;
+}
+.change-time-div button {
+  float: right;
+  margin: 0!important;
+}
+.change-time-div span {
+  line-height: 35px!important;
+  float: left;
+  color: #000;
+}
+.input-datetime-div {
+  float: right;
+  width: 160px;
+}
