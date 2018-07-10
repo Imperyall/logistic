@@ -24,14 +24,14 @@ const DEFAULT_STATE = {
 
 const getRouteBounds = route => {
   const bounds = new window.google.maps.LatLngBounds();
-  if (route.waypoints.length) {
-    const points = route.waypoints.map((waypoint) => (
-      waypoint.geometry 
-      ? waypoint.geometry.split(',').map(item => window.google.maps.geometry.encoding.decodePath(item)).reduce((prev, next) => [...prev, ...next])
-      : [new window.google.maps.LatLng(waypoint.lat, waypoint.lng)]
+  if (route.index.length) {
+    const points = route.index.map(index => (
+      index.geometry 
+      ? index.geometry.split(',').map(item => window.google.maps.geometry.encoding.decodePath(item)).reduce((prev, next) => [...prev, ...next])
+      : [new window.google.maps.LatLng(index.doc.waypoint.lat, index.doc.waypoint.lng)]
     )).reduce((prev, next) => [...prev, ...next]);
 
-    points.forEach((point) => bounds.extend(point));
+    points.forEach(point => bounds.extend(point));
   }
 
   return bounds;
@@ -44,17 +44,51 @@ export default function points(state = DEFAULT_STATE, action) {
 		case FETCH_ROUTES_SUCCESS: {
       return {
 				...state,
-				routes: action.payload.map((item, index) => ({ ...item, color: getRouteColor(index) })),
+				routes: action.payload.map((item, index) => {
+          let [count, weightAll, volumeAll, sku, pallet, serviceTimeAll] = [ [], 0, 0, 0, 0, 0 ];
+          let indexes = [];
+
+          for (let i in item.index) {
+            const doc = item.index[i].doc, current = item.index[i];
+            const position = { lat: +doc.waypoint.lat, lng: +doc.waypoint.lng };
+
+            let single = true;
+            if (!indexes.find(ind => ind.lat == position.lat && ind.lng == position.lng)) indexes.push(position); else single = false;
+
+            count = count.indexOf(doc.waypoint.pk) === -1 ? [ ...count, doc.waypoint.pk ] : count;
+            weightAll += +doc.weight;
+            volumeAll += +doc.volume;
+            sku += +doc.sku;
+            pallet += +doc.pallet;
+            serviceTimeAll += +current.service_time;
+            item.index[i] = { ...current, title: single ? (+i + 1).toString() : '', single };
+          }
+
+          return {
+            ...item, 
+            countRNK: item.index.length,
+            count: count.length,//: item.index.reduce((acc, cur) => acc.indexOf(cur.doc.waypoint.pk) === -1 ? [ ...acc, cur.doc.waypoint.pk ] : acc, []).length,
+            weightAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.weight), 0).toFixed(),
+            volumeAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.volume), 0).toFixed(3),
+            sku,
+            pallet,
+            serviceTimeAll,
+            color: getRouteColor(index)
+          };
+        }),
       };
     }
 
     case TOGGLE_OPEN_ROUTE: {
+      const { routeIndex, mapSelect } = action.payload;
+      if (state.openRouteIds[routeIndex] && mapSelect) return state;
+
       return {
-				...state,
-				openRouteIds: { 
-					...state.openRouteIds,
-					[action.payload]: !state.openRouteIds[action.payload],
-				}
+        ...state,
+        openRouteIds: 
+          mapSelect 
+          ? { [routeIndex]: true } 
+          : { ...state.openRouteIds, [routeIndex]: !state.openRouteIds[routeIndex] }
       };
     }
 
@@ -91,7 +125,7 @@ export default function points(state = DEFAULT_STATE, action) {
 					markers = state.markers;
       const { routeIndex, value, shift } = action.payload;
       const route = state.routes[routeIndex],
-            waypoints = route.waypoints,
+            waypoints = route.index,
             id = route.id;
 
       if (shift) {
@@ -133,11 +167,11 @@ export default function points(state = DEFAULT_STATE, action) {
 								}
               };
 
-              let wa = state.routes[i].waypoints;
+              let wa = state.routes[i].index;
 
               for (let key in wa) {
                 if (!markers[i]) markers[i] = new Array();
-                markers[i].push({ lat: +wa[key].lat, lng: +wa[key].lng });
+                markers[i].push({ lat: +wa[key].doc.waypoint.lat, lng: +wa[key].doc.waypoint.lng });
               }
             }
 
@@ -150,7 +184,7 @@ export default function points(state = DEFAULT_STATE, action) {
         if (value) {
           for (let key of waypoints) {
             if (!markers[routeIndex]) markers[routeIndex] = new Array();
-            markers[routeIndex].push({ lat: +key.lat, lng: +key.lng });
+            markers[routeIndex].push({ lat: +key.doc.waypoint.lat, lng: +key.doc.waypoint.lng });
           }
         } else {
           delete markers[routeIndex];
@@ -183,7 +217,7 @@ export default function points(state = DEFAULT_STATE, action) {
 		case SET_ACTIVE_WAYPOINT: {
 			let newState = state;
 			const { routeIndex, waypointIndex, add } = action.payload;
-			const waypoint = state.routes[routeIndex].waypoints[waypointIndex];
+			const waypoint = state.routes[routeIndex].index[waypointIndex];
 
 			let array = state.activeWaypointId ?  state.activeWaypointId : [], 
 					id = waypoint.id,
@@ -196,11 +230,7 @@ export default function points(state = DEFAULT_STATE, action) {
 			}
 
 			//if (value) {
-			const center = { lat: +waypoint.lat, lng: +waypoint.lng };
-						newState = {
-							...newState,
-							center: center,
-						};
+			newState = { ...newState, center: { lat: +waypoint.doc.waypoint.lat, lng: +waypoint.doc.waypoint.lng } };
 			//}
 
 			return {

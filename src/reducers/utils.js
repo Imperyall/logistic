@@ -6,6 +6,7 @@ import {
 	BEGIN_LOADING,
 	CHANGE_BLOCKS_SIZE,
 	SAVE_COMMENT,
+  CHANGE_ZOOM,
 } from '../constants/actionTypes';
 
 //import { fromJS, List } from 'immutable';
@@ -18,6 +19,7 @@ const DEFAULT_STATE = {
   isLoading: [],
   windowSize: {},
   modalData: {},
+  zoom: 13,
 };
 
 export default function utils(state = DEFAULT_STATE, action) {
@@ -77,6 +79,13 @@ export default function utils(state = DEFAULT_STATE, action) {
       return {
 				...state,
 				modalData: action.payload,
+      };
+    }
+
+    case CHANGE_ZOOM: {
+      return {
+        ...state,
+        zoom: action.payload,
       };
     }
 

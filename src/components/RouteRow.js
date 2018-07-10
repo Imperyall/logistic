@@ -3,6 +3,7 @@ import { Table, Checkbox, Icon } from 'semantic-ui-react';
 import { DropTarget } from 'react-dnd';
 import * as dragTypes from '../constants/dragTypes';
 import { pprintSeconds } from '../utils';
+import moment from 'moment';
 
 
 const routeTarget = {
@@ -76,8 +77,8 @@ const RouteRow = props => {
 
   
 
-  const getFilterClass = (th) => {
-    if (!ifOpen) return null;
+  const getFilterClass = th => {
+    if (!ifOpen) return '';
 
     const { openSort, thSort, order } = state;
     const filterCss = "th-filterable";
@@ -96,72 +97,83 @@ const RouteRow = props => {
         style={style}>
       <Th collapsing
         className={getFilterClass('num')}
-        onClick={(e) => ifOpen && props.clickFilter(route.id, 'num', e)}
+        onClick={e => ifOpen && props.clickFilter(route.id, 'num', e)}
         title={ifOpen && titleText.num}>
         <Checkbox
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
           onChange={onCheckboxChange}
           checked={checked}
         />
       </Th>
       <Th className={getFilterClass('id1')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'id1', e)}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'id1', e)}
           title={ifOpen && titleText.id1}>
         {route.autocreated && <span><Icon name="desktop" color="blue" /></span>}
         {route.recycled && <span><Icon name="remove circle" color="red" /></span>}
         {route.accepted && <span><Icon name="check circle" color="yellow" /></span>}
         {route.accepted_tabs && <span><Icon name="check circle" color="green" /></span>}
-        <small>
-          {rowTitle}
+        <small><span className="nowr">{rowTitle}</span></small>
+        <small style={{ display: 'grid' }}>
           {/*{route.collectionRem && "Непопавшие РНК "}*/}
-          {route.id1} <br/> {!route.bin && <small>{route.createdDate}</small>}
+          {route.id1 && <span className="nowr">{"Код 1С:" + route.id1}</span>}
+          {route.id && <span className="nowr">{"Код внутр.:" + route.id}</span>}
+          {!route.bin && <span className="nowr"><small>{moment(route.created_date).format("HH:mm DD.MM.YYYY")}</small></span>}
         </small>
       </Th>
       <Th className={getFilterClass('title')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'title', e)}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'title', e)}
           title={ifOpen && titleText.title}>
         <small style={{ display: 'grid' }}>
-          {!route.bin && <span className="nowr">{route.car}</span>}
-          {!route.bin && <span className="nowr">{route.car && route.car_brand}</span>}
-          {!route.bin && <span className="nowr">{route.car_driver}</span>} 
-          {route.car_virtual && <span>виртуальный</span>}
+          {!route.bin && <span className="nowr">{route.car && route.car.number}</span>}
+          {!route.bin && <span className="nowr">{route.car && route.car.brand}</span>}
+          {!route.bin && <span className="nowr">{route.driver}</span>} 
+          {route.car && route.car.virtual && <span>виртуальный</span>}
         </small>
       </Th>
-      <Th>{!route.bin && <small> База: {route.deliveryDeps} </small>}<br/></Th>
+      <Th>{!route.bin && <small> База: {route.delivery_dep.length > 0 && route.delivery_dep[0].title} </small>}<br/></Th>
       <Th>{!route.bin && <small> Логист: {route.author} </small>}</Th>
-      <Th>{!route.bin && <small> Вид оптимизации: <br/> {route.optimizeType} </small>}</Th>
+      <Th>{!route.bin && <small> Вид оптимизации: <br/> {route.optimize_type} </small>}</Th>
       <Th className={getFilterClass('address')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'address', e)}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'address', e)}
           title={ifOpen && titleText.address}>
         <small>РНК: {route.countRNK} ТТ: {route.count}</small>
       </Th>
       <Th className={getFilterClass('sku')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'sku', e)}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'sku', e)}
           title={ifOpen && titleText.sku}>
-        <small>SKU: {route.sku}</small>
+        <small>SKU: {(+route.sku).toFixed()}</small>
       </Th>
       <Th className={getFilterClass('weight')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'weight', e)}
-          title={ifOpen && titleText.weight}>
-        <small>Масса {(+route.weightAll).toFixed()} кг {(route.car||route.car_virtual) && ((route.weightAll * 100) / route.car_weight).toFixed()+"%"}</small>
+        onClick={e => ifOpen && props.clickFilter(route.id, 'weight', e)}
+        title={ifOpen && titleText.weight}>
+        <small style={{ display: 'grid' }}>
+          <span>Масса {(+route.weightAll).toFixed()} кг</span>
+          <span className="nowr">{(route.car && (route.car.number || route.car.virtual)) && ((route.weightAll * 100) / route.car.weight).toFixed()+"%"}</span>
+        </small>
       </Th>
       <Th className={getFilterClass('volumeAll')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'volumeAll', e)}
-          title={ifOpen && titleText.volumeAll}>
-        <small>Объем {route.volumeAll} м3 {(route.car||route.car_virtual) && ((route.volumeAll * 100) / route.car_volume).toFixed()+"%"}</small>
+        onClick={e => ifOpen && props.clickFilter(route.id, 'volumeAll', e)}
+        title={ifOpen && titleText.volumeAll}>
+        <small style={{ display: 'grid' }}>
+          <span>Объем {(+route.volumeAll).toFixed(3)} м3</span>
+          <span className="nowr">{(route.car && (route.car.number || route.car.virtual)) && ((route.volumeAll * 100) / route.car.volume).toFixed()+"%"}</span>
+        </small>
       </Th>
       <Th className={getFilterClass('pallet')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'pallet', e)}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'pallet', e)}
           title={ifOpen && titleText.pallet}>
         <small>Паллет {(+route.pallet).toFixed(2)} шт.</small>
       </Th>
       <Th className={getFilterClass('distance')}
-          onClick={(e) => ifOpen && props.clickFilter(route.id, 'distance', e)}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'distance', e)}
           title={ifOpen && titleText.distance}>
-        <small>Километраж {(route.distance / 1000).toFixed()} км</small>
+        <small style={{ display: 'grid' }}>
+          <span>Километраж: {(route.distance / 1000).toFixed()} км</span>
+          {route.index.length !== 0 && <span>До 1 точки: {(route.index[0].distance / 1000).toFixed()} км</span>}
+        </small>
       </Th>
       <Th><small>Время в ТТ: {pprintSeconds(+route.serviceTimeAll)}</small></Th>
-      <Th><small>Общее время: {pprintSeconds(+route.duration)} ({route.plannedTimeS} - {route.plannedTimeE})</small></Th>
+      <Th><small>Общее время: {pprintSeconds(+route.duration)} ({moment(route.planned_time_s).format("HH:mm")} - {moment(route.planned_time_e).format("HH:mm")})</small></Th>
       <Th textAlign="center" collapsing>
         <Icon
           name="list"

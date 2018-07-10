@@ -4,6 +4,7 @@ body {
 
 button, .button-div {
   max-height: 36px;
+  height: 100%;
 }
 
 #page {
@@ -115,8 +116,11 @@ button, .button-div {
   margin-right: auto;
   width: 100%;
 }
-.nowr {
+.nowr, .buttons_row {
   white-space: nowrap;
+}
+.buttons_row {
+  display: inherit;
 }
 .change-time-div {
   padding: 10px!important;
@@ -139,3 +143,167 @@ button, .button-div {
   float: right;
   width: 160px;
 }
+
+.waypoint-edit-modal {
+  height: 95vh!important;
+  width: 95vw!important;
+  margin-top: 2.5vh!important;
+  margin-left: 2.5vw!important;
+  left: 0px!important;
+  top: 0px!important;
+}
+
+.waypoint-edit-modal .content {
+  height: 80vh;
+}
+
+.waypoint-edit-modal form {
+  width: 42%;
+  height: 100%;
+  float: left;
+  overflow: auto;
+  padding-right: 5px;
+}
+
+.waypoint-edit-modal .map {
+  height: 60vh;
+  width: 57%;
+  float: right;
+}
+
+.bottom-side {
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+}
+
+
+
+
+
+
+/*.map-maker-icon {
+  color: #FD6C6C;
+}
+
+.suggestion-icon {
+  margin-right: 8px;
+}*/
+
+.search-bar-container {
+  width: 57%;
+  float: right;
+  margin-bottom: 15px;
+}
+
+.search-input-container {
+  position: relative;
+}
+
+.location-search-input,
+.location-search-input:focus,
+.location-search-input:active {
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
+  border: honeydew;
+  display: block;
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  border-radius: 2px;
+  outline: none;
+}
+
+/*.clear-button,
+.clear-button:active,
+.clear-button:focus {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-weight: 600;
+  color: #999;
+}*/
+
+.autocomplete-container {
+  border-bottom: honeydew;
+  border-left: honeydew;
+  border-right: honeydew;
+  border-top: 1px solid #e6e6e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border-radius: 0 0 2px 2px;
+  z-index: 10;
+  width: 100%;
+}
+
+.suggestion-item, .suggestion-item--active {
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestion-item {
+  background-color: #fff;
+}
+
+.suggestion-item--active {
+  background-color: #eaeaea;
+}
+
+/*.dropdown-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px;
+}*/
+
+/*.dropdown-footer-image {
+  display: inline-block;
+  width: 150px;
+}*/
+
+/*.spinner {
+  color: #18bc9c;
+  font-size: 30px;
+}*/
+
+.error-message {
+  color: red;
+}
+
+/*.geocode-result-header {
+  font-size: 20px;
+  color: #222222;
+}*/
+
+/*@media (max-width: 480px) {
+  .autocomplete-container {
+    text-align: left;
+  }
+}
+
+@media (min-width: 768px) {
+  .alert {
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    -webkit-animation: fadein .75s;
+    -moz-animation: fadein .75s;
+    -ms-animation: fadein .75s;
+    -o-animation: fadein .75s;
+    animation: fadein .75s;
+  }
+
+  .btn {
+    margin-top: 1.5rem;
+  }
+
+  .form-group {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5rem;
+    width: 50%;
+  }
+}*/

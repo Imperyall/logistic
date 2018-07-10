@@ -11,11 +11,13 @@ import Table from '../components/Table';
 import Overview from '../components/Overview';
 import ModalExtend from '../components/ModalExtend';
 import MoveWindow from '../components/MoveWindow';
-import {NotificationContainer, NotificationManager} from 'react-notifications';
+import ModalWaypointEdit from '../components/ModalWaypointEdit';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 
 const { LatLngBounds } = window.google.maps;
-const defaultTime = moment().hour(8).minutes(0).seconds(0).format('YYYY-MM-DDTHH:mm:ss');
+const fullTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
+const defaultTime = moment().hour(8).minutes(0).seconds(0).format(fullTimeFormat);
 
 window.notify = NotificationManager;
 
@@ -27,28 +29,31 @@ class App extends React.Component {
     this.handleDeliveryZonesChange = this.handleDeliveryZonesChange.bind(this);
     this.handleFromDateChange =      this.handleFromDateChange.bind(this);
     this.handleToDateChange =        this.handleToDateChange.bind(this);
-    this.handleShowRecycled =        this.handleShowRecycled.bind(this);
+    this.handleRecycled =            this.handleRecycled.bind(this);
     this.handleMoveWaypoint =        this.handleMoveWaypoint.bind(this);
     this.getFetchParams =            this.getFetchParams.bind(this);
     this.handleMapLoad =             this.handleMapLoad.bind(this);
     this.handleModalShow =           this.handleModalShow.bind(this);
+    this.handleWaypointEditShow =    this.handleWaypointEditShow.bind(this);
     this.modalShow =                 this.modalShow.bind(this);
-    this.handleLockMap =             this.handleLockMap.bind(this);
+    this.waypointEditShow =          this.waypointEditShow.bind(this);
     this.handleFilterValue =         this.handleFilterValue.bind(this);
     this.handleSearchDropdown =      this.handleSearchDropdown.bind(this);
     this.handleStartRouteTime =      this.handleStartRouteTime.bind(this);
     this.handleStartRouteDate =      this.handleStartRouteDate.bind(this);
     this.handleStartRouteClear =     this.handleStartRouteClear.bind(this);
+    this.handleMapZoom =             this.handleMapZoom.bind(this);
+    this.saveWaypoint =              this.saveWaypoint.bind(this);
 
     this.state = {
-      fromDate: moment().date(1).month(1).year(2013).format('YYYY-MM-DD'),
+      fromDate: moment().format('YYYY-MM-DD'),
       toDate: moment().add(1, 'days').format('YYYY-MM-DD'),
       deliveryDeps: [],
       deliveryZones: [],
-      showRecycled: false,
+      recycled: false,
       isLoading: true,
       modalData: {},
-      lockMap: false,
+      waypointModalData: {},
       filterValue: '',
       searchDropdown: '',
       startRoute: defaultTime,
@@ -72,55 +77,70 @@ class App extends React.Component {
     }
   }
 
-  getFetchParams(newFormat) {
-    const { fromDate, toDate, deliveryDeps, showRecycled } = this.state;
-    let res;
+  getFetchParams(fullTime) {
+    const { fromDate, toDate, deliveryDeps } = this.state;
+    let delivery_dep = deliveryDeps.length > 0 ? deliveryDeps : null,
+        recycled = !this.state.recycled ? null : this.state.recycled;
+    const format = fullTime ? fullTimeFormat : 'YYYY-MM-DD';
 
-    res = newFormat ? {
-      date_from: moment(fromDate).format('YYYY-MM-DDTHH:mm:ss'),
-      date_to: moment(toDate).format('YYYY-MM-DDTHH:mm:ss'),
-      delivery_dep: deliveryDeps.length > 0 ? deliveryDeps : 'null',
-    } : {
-      fromDate: moment(fromDate).format('DD.MM.YYYY'),
-      toDate: moment(toDate).format('DD.MM.YYYY'),
-      deliveryDeps: deliveryDeps.length > 0 ? deliveryDeps.join(',') : 'null',
-      showRecycled,
+    return {
+      delivery_date_from: moment(fromDate).format(format),
+      delivery_date_to: moment(toDate).format(format),
+      delivery_dep,
+      recycled,
     };
-
-    return res;
   }
 
   handleDeliveryDepsChange(event, data) {
-    this.setState({ deliveryDeps: data.value});
+    this.setState({ deliveryDeps: data.value });
     this.props.fetchDeliveryZones(data.value);
   }
 
   handleDeliveryZonesChange(event, data) {
-    this.setState({ deliveryZones: data.value});
+    this.setState({ deliveryZones: data.value });
   }
 
   handleFromDateChange(event) {
-    this.setState({ fromDate: event.target.value});
+    this.setState({ fromDate: event.target.value });
   }
 
   handleToDateChange(event) {
-    this.setState({ toDate: event.target.value});
+    this.setState({ toDate: event.target.value });
   }
 
-  handleShowRecycled() {
-    this.setState((prevState) => { 
-      return { showRecycled: !prevState.showRecycled };
+  handleRecycled() {
+    this.setState(prevState => { 
+      return { recycled: !prevState.recycled };
     });
   }
 
   handleModalShow() {
-    this.setState((prevState) => { 
-      return { modalData: { open : !prevState.modalData.open } };
-    });
+    this.setState(prevState => ({ modalData: { open : !prevState.modalData.open } }));
+  }
+
+  handleWaypointEditShow() {
+    const find_point = (arr, id) => {
+      if (id.length == 0 || arr.length == 0) return {};
+
+      for (let i of arr) {
+        const item = i.index.find(w => w.id == id[0]);
+
+        if (item) return item;
+      }
+
+      return {};
+    };
+
+    this.setState(prevState => ({ 
+      waypointModalData: { 
+        open : !prevState.waypointModalData.open, 
+        waypoint: find_point(this.props.routes, this.props.activeWaypointId),
+      }
+    }));
   }
 
   handleFilterValue(data) {
-    this.setState({ filterValue: data.value});
+    this.setState({ filterValue: data.value });
   }
 
   handleStartRouteTime(event) {
@@ -135,7 +155,7 @@ class App extends React.Component {
         'date': moment(this.state.startRoute).get('date'),
       };
 
-      this.setState({ startRoute: moment().set(value).format('YYYY-MM-DDTHH:mm:ss') });
+      this.setState({ startRoute: moment().set(value).format(fullTimeFormat) });
     }
   }
 
@@ -151,7 +171,7 @@ class App extends React.Component {
         'date': moment(time).get('date'),
       };
 
-      this.setState({ startRoute: moment().set(value).format('YYYY-MM-DDTHH:mm:ss') });
+      this.setState({ startRoute: moment().set(value).format(fullTimeFormat) });
     }
   }
 
@@ -164,25 +184,31 @@ class App extends React.Component {
     this.setState({ searchDropdown: value });
   }
 
-  handleLockMap(state) {
-    this.setState({ lockMap: state });
-  }
-
   modalShow({ open, id, comment, id1 }) {
     if (!open && id) {
       this.props.saveComment(this.getFetchParams(), { id, comment });
     }
-    this.setState({
-      modalData: { open, id, comment, id1 }
-    });
+    this.setState({ modalData: { open, id, comment, id1 } });
+  }
+
+  waypointEditShow({ open, waypoint }) {
+    this.setState({ waypointModalData: { open, waypoint } });
+  }
+
+  handleMapZoom() {
+    this.props.changeZoom(this._mapComponent.getZoom());
+  }
+
+  saveWaypoint(params) {
+    this.props.saveWaypoint(this.getFetchParams(), params);
   }
 
   handleMoveWaypoint(dragIndex, hoverIndex) {
     const newRoutes = [...this.props.routes];
 
-    const dragWaypoint = newRoutes[dragIndex.routeIndex].waypoints[dragIndex.waypointIndex];
-    newRoutes[dragIndex.routeIndex].waypoints.splice(dragIndex.waypointIndex, 1);
-    newRoutes[hoverIndex.routeIndex].waypoints.splice(hoverIndex.waypointIndex, 0, dragWaypoint);
+    const dragWaypoint = newRoutes[dragIndex.routeIndex].index[dragIndex.waypointIndex];
+    newRoutes[dragIndex.routeIndex].index.splice(dragIndex.waypointIndex, 1);
+    newRoutes[hoverIndex.routeIndex].index.splice(hoverIndex.waypointIndex, 0, dragWaypoint);
 
     const fromRoute = newRoutes[dragIndex.routeIndex];
     const toRoute = newRoutes[hoverIndex.routeIndex];
@@ -192,8 +218,8 @@ class App extends React.Component {
       {
         fromRoute: fromRoute.id,
         toRoute: toRoute.id,
-        fromList: fromRoute.waypoints.map((waypoint) => waypoint.id),
-        toList: toRoute.waypoints.map((waypoint) => waypoint.id),
+        fromList: fromRoute.index.map(waypoint => waypoint.id),
+        toList: toRoute.index.map(waypoint => waypoint.id),
       }
     );
 
@@ -207,20 +233,16 @@ class App extends React.Component {
 
   render() {
     const { fromDate, toDate, deliveryDeps, deliveryZones } = this.state;
-    const { checkedRouteIds } = this.props;
-    const deliveryDepsOptions = this.props.deliveryDeps.map((option) => ({
+    const { checkedRouteIds, routes } = this.props;
+    const deliveryDepsOptions = this.props.deliveryDeps.map(option => ({
       text: option.title, value: option.id
     }));
 
-    const deliveryZonesOptions = this.props.deliveryZones.length !== 0 ? this.props.deliveryZones.map((option) => ({
+    const deliveryZonesOptions = this.props.deliveryZones.length !== 0 ? this.props.deliveryZones.map(option => ({
       text: option.title, value: option.id
     })) : [];
 
-    let routesForOverview = [...this.props.routes].filter((item) =>
-      checkedRouteIds[item.id]
-    );
-
-    if (routesForOverview.length === 0) { routesForOverview = this.props.routes; }
+    const routesForOverview = Object.keys(checkedRouteIds).length == 0 ? routes : routes.filter(item => checkedRouteIds[item.id]);
 
     let checkedRouteIdsArray = [];
     for (let key in checkedRouteIds) {
@@ -278,8 +300,8 @@ class App extends React.Component {
               <Form.Checkbox 
                 id="chk1" 
                 className="vertical-auto"
-                checked={this.state.showRecycled} 
-                onChange={this.handleShowRecycled} 
+                checked={this.state.recycled} 
+                onChange={this.handleRecycled} 
                 label="Удаленные" />
               <Form.Button 
                 color="blue" 
@@ -411,7 +433,7 @@ class App extends React.Component {
                 {/*Выгрузить отчет
               </Form.Button>*/}
               {checkedRouteIdsArray.length !== 0 ? 
-              <div className="nowr">
+              <div className="buttons_row">
                 <Dropdown 
                   className="ui icon basic teal button button-div"
                   title="Сменить водителя"
@@ -446,7 +468,7 @@ class App extends React.Component {
                   title="Сменить ТС"
                   onClick={() => {
                     this.handleSearchDropdown();
-                    this.props.fetchCars(this.getFetchParams(true));
+                    this.props.fetchCars({ ...this.getFetchParams(true), avail: true });
                   }}
                   icon="car" >
                   <Dropdown.Menu>
@@ -460,7 +482,8 @@ class App extends React.Component {
                       className="search" />
                     <Dropdown.Menu scrolling>
                       {this.props.cars.length !== 0 && !this.props.isLoading
-                        && this.props.cars.filter(option => option.brand.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 || option.number.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 )
+                        && this.props.cars.filter(option => option.brand && option.brand.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 
+                          || option.number && option.number.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 )
                           .map(option => 
                             (<Dropdown.Item 
                               key={option.id} 
@@ -526,23 +549,31 @@ class App extends React.Component {
                 </Dropdown>
               </div> : null }
               {this.props.activeWaypointId !== null ? 
-              <Dropdown 
-                className="ui icon basic violet button button-div"
-                title="Переместить в другой маршрут" 
-                icon="move" >
-                <Dropdown.Menu>
-                  <Dropdown.Header content="Маршрут для перемещения" />
-                  <Dropdown.Menu scrolling>
-                    {this.props.routes.map(item => 
-                      (<Dropdown.Item 
-                        key={item.id} 
-                        value={item.id} 
-                        onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} 
-                        text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />)
-                    )}
-                  </Dropdown.Menu> 
-                </Dropdown.Menu>  
-              </Dropdown> : null }
+              <div className="buttons_row">
+                <Dropdown 
+                  className="ui icon basic violet button button-div"
+                  title="Переместить в другой маршрут" 
+                  icon="move" >
+                  <Dropdown.Menu>
+                    <Dropdown.Header content="Маршрут для перемещения" />
+                    <Dropdown.Menu scrolling>
+                      {routes.map(item => 
+                        (<Dropdown.Item 
+                          key={item.id} 
+                          value={item.id} 
+                          onClick={() => this.props.moveWaypoints(this.getFetchParams(), item.id, this.props.activeWaypointId)} 
+                          text={item.collection ? "Набор РНК " : item.collectionRem ? "Непопавшие РНК " : item.bin ? "Корзина" : "Маршрут " + item.id1} />)
+                      )}
+                    </Dropdown.Menu> 
+                  </Dropdown.Menu>  
+                </Dropdown>
+                <Button 
+                  title="Редактировать торговую точку"
+                  basic 
+                  color="violet"
+                  icon="edit"
+                  onClick={() => this.handleWaypointEditShow()} />
+              </div> : null }
             </div>
           </Form>
           <Input 
@@ -555,7 +586,7 @@ class App extends React.Component {
             <Icon name="search" />
           </Input>
           <Table
-            routes={[...this.props.routes]}
+            routes={[...routes]}
             filter={this.state.filterValue}
             moveWaypoint={this.handleMoveWaypoint}
             endMoveWaypoint={(d, h) => this.handleMoveWaypoint(d, h)}
@@ -582,17 +613,18 @@ class App extends React.Component {
             <GoogleMap
               containerElement={<div style={{ height: "60vh" }} />}
               mapElement={<div style={{ height: "60vh" }} />}
-              routes={this.props.routes}
-              lockMap={this.state.lockMap}
-              handleLockMap={this.handleLockMap}
+              routes={routes}
+              lockMap={this.props.moveWindow.show}
               handleShowText={this.handleShowText}
               app={this.props}
               onMapLoad={this.handleMapLoad}
               center={this.props.center}
+              zoom={this.props.zoom}
+              changeZoom={this.handleMapZoom}
               //markerPosition={this.props.markerPosition}
               //markerIcon={this.props.markerIcon}
               activeWaypointId={this.props.activeWaypointId}
-              markers={this.props.markers}
+              // markers={this.props.markers}
               setActiveWaypoint={this.props.setActiveWaypoint}
               checkedRouteIds={this.props.checkedRouteIds} />
             <Overview data={overviewData} />
@@ -601,6 +633,11 @@ class App extends React.Component {
         <ModalExtend 
           data={this.state.modalData}
           modalShow={this.modalShow} />
+        <ModalWaypointEdit
+          center={this.props.center}
+          save={this.saveWaypoint}
+          data={this.state.waypointModalData}
+          modalShow={this.waypointEditShow} />
         <MoveWindow
           data={this.props.moveWindow} />
         <NotificationContainer/>
@@ -654,6 +691,9 @@ App.propTypes = {
   activeRouteId:     PropTypes.number,
   center:            PropTypes.object,
   markers:           PropTypes.array,
+  zoom:              PropTypes.number,
+  changeZoom:        PropTypes.func,
+  saveWaypoint:      PropTypes.func,
 };
 
 const mapStateToProps = state => ({
@@ -673,6 +713,7 @@ const mapStateToProps = state => ({
     moveWindow:       state.moveWin,
     cars:             state.utils.cars,
     drivers:          state.utils.drivers,
+    zoom:             state.utils.zoom,
 });
 
 const mapDispatchToProps = actionsMap;

@@ -35,14 +35,12 @@ class RouteTable extends React.Component {
   }
 
   handleOrder({ openSort, routeSort, thSort }) {
-    this.setState((prevState) => {
-      return {
-        openSort,
-        routeSort,
-        thSort,
-        order: prevState.thSort !== thSort ? -1 : prevState.order * -1,
-      };
-    });
+    this.setState(prevState => ({
+      openSort,
+      routeSort,
+      thSort,
+      order: prevState.thSort !== thSort ? -1 : prevState.order * -1,
+    }));
   }
 
   render() {
@@ -56,17 +54,15 @@ class RouteTable extends React.Component {
         this.handleOrder({ openSort: true, routeSort, thSort });
       };
 
-      let waypoints = [];
+      let indexes = [];
 
       if (ifFilter || this.props.openRouteIds[route.id]) {
-        waypoints = route.waypoints;
+        indexes = route.index;
         const { openSort, thSort, routeSort, order } = this.state;
 
         if (openSort && this.props.openRouteIds[routeSort]) {
-          waypoints = waypoints.sort((a,b) => {
-            const numbers = ["num", "sku", "weight", "volumeAll", "pallet", "distance"];
-            
-            if (numbers.indexOf(thSort) === -1) {
+          indexes = indexes.sort((a,b) => {
+            if (["num", "sku", "weight", "volumeAll", "pallet", "distance"].indexOf(thSort) === -1) {
               if (a[thSort] > b[thSort]) return order * -1; else
               if (a[thSort] < b[thSort]) return order * 1;  else
               if (a[thSort] === b[thSort]) return 0;
@@ -76,7 +72,7 @@ class RouteTable extends React.Component {
           });
         }
 
-        waypoints = waypoints.map((waypoint, index2) => {
+        indexes = indexes.map((waypoint, index2) => {
           const active = Array.isArray(this.props.activeWaypointId) ? this.props.activeWaypointId.indexOf(waypoint.id) !== -1 : false;
 
           return (
@@ -91,7 +87,7 @@ class RouteTable extends React.Component {
               //previewMoveWaypoint={this.props.previewMoveWaypoint}
               endMoveWaypoint={this.props.endMoveWaypoint}
               modalShow={this.props.modalShow}
-              onClick={(e) => this.props.setActiveWaypoint(index, index2, !active, e.ctrlKey)}
+              onClick={e => this.props.setActiveWaypoint({ routeIndex: index, waypointIndex: index2, add: e.ctrlKey })}
               active={active}
               filter={this.props.filter}
             />
@@ -99,12 +95,12 @@ class RouteTable extends React.Component {
         });
 
         if (ifFilter) {
-          waypoints = waypoints.filter((waypoint) => {
-            waypoint = waypoint.props.waypoint;
+          indexes = indexes.filter(waypoint => {
+            waypoint = waypoint.props.waypoint.doc;
             const props = [
               //'num',
               'address',
-              'deliveryDep',
+              'delivery_dep',
               //'base',
               //'distance',
               //'duration',
@@ -117,6 +113,7 @@ class RouteTable extends React.Component {
             ];
 
             for (const prop of props) {
+              if (prop == 'address') waypoint = waypoint.waypoint;
               if (waypoint.hasOwnProperty(prop) && waypoint[prop] !== null && String(waypoint[prop]).toLowerCase().indexOf(this.props.filter.toLowerCase()) !== -1) return true;
             }
 
@@ -125,7 +122,7 @@ class RouteTable extends React.Component {
         }
       }      
 
-      let rows = !ifFilter || ifFilter && waypoints.length ? [
+      let rows = !ifFilter || ifFilter && indexes.length ? [
         <RouteRow
           key={index}
           route={route}
@@ -135,13 +132,13 @@ class RouteTable extends React.Component {
           ifMoveWaypoint={this.props.ifMoveWaypoint}
           onClick={() => this.props.setActiveRoute(index, !(route.id === this.props.activeRouteId))}
           checked={this.props.checkedRouteIds[route.id]}
-          onCheckboxChange={(e) => this.props.setCheckedRoute(index, !this.props.checkedRouteIds[route.id], e.shiftKey)}
+          onCheckboxChange={e => this.props.setCheckedRoute(index, !this.props.checkedRouteIds[route.id], e.shiftKey)}
           active={this.props.activeRouteId === route.id}
           endMoveWaypoint={this.props.endMoveWaypoint}
           ifOpen={!!this.props.openRouteIds[route.id]}
           state={this.state}
           clickFilter={clickFilter}
-          onToggleOpen={(e) => {
+          onToggleOpen={e => {
             e.stopPropagation();
             this.props.toggleOpenRoute(route.id);
             this.checkOpen();
@@ -150,14 +147,14 @@ class RouteTable extends React.Component {
       ] : [];
 
       // if (this.props.openRouteIds[route.id] || ifFilter) {
-      //   rows = [...rows, ...waypoints];
+      //   rows = [...rows, ...indexes];
       // }
 
-      return [...rows, ...waypoints];
+      return [...rows, ...indexes];
     });
 
     return (
-      <Table size="small" compact="very" celled structured className="main-table">
+      <Table id="table-wrap" size="small" compact="very" celled structured className="main-table">
         <Table.Header>
           <Table.Row>
             {/*<Table.HeaderCell className="table-th">№</Table.HeaderCell>*/}
@@ -177,7 +174,7 @@ class RouteTable extends React.Component {
             {/*<Table.HeaderCell className="table-th"></Table.HeaderCell>*/}
           </Table.Row>
         </Table.Header>
-        <Table.Body className="table-style">
+        <Table.Body id="table-body" className="table-style">
           {routeTables}
         </Table.Body>
       </Table>

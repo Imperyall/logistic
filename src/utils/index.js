@@ -12,6 +12,10 @@ export const pprintSeconds = seconds => {
   return `${hours}:${mins < 10 ? '0' : ''}${mins}`;
 };
 
+export const generateIcon = color => {
+  return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="30px" height="30px" viewBox="0 -10 561 581" style="enable-background:new 0 -10 561 581;" xml:space="preserve"><g><g><g id="beenhere"><path d="M459,0H102C73.95,0,51,22.95,51,51v328.95c0,17.85,7.65,33.149,22.95,43.35L280.5,561l206.55-137.7  C499.8,413.1,510,397.8,510,379.95V51C510,22.95,487.05,0,459,0z" data-original="#000000" class="active-path" data-old_color="#1CDC20" fill="${color}" fill-opacity="1" stroke="black" stroke-width="20" stroke-linecap="round"/></g></g></g></svg>`;
+};
+
 export const debounce = (callback, wait, context = this) => {
   let timeout = null;
   let callbackArgs = null;
@@ -88,7 +92,7 @@ export class EventUtil {
   }
 
   resize_move() {
-    let prop = window._divider || 33;
+    let prop = window._divider || 30;
     window._divider = 0;
     const nx = event.clientX;
     window._sb = window.innerWidth - document.body.clientWidth;
