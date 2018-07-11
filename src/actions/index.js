@@ -17,6 +17,8 @@ import {
   HANDLE_WINDOW_POINT,
   CLEAR_SELECTION,
   CHANGE_ZOOM,
+  HANDLE_LOADING_TIMEOUT,
+  HANDLE_LOADING_NEXT_TICK,
 } from '../constants/actionTypes';
 import BASE_URL from '../constants/baseURL';
 import { getRandomString } from '../utils';
@@ -24,6 +26,7 @@ import { MAP } from 'react-google-maps/lib/constants';
 
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+// axios.defaults.withCredentials = true;
 
 const logging = (fun, response) => {
   //process.env.NODE_ENV === 'development' && 
@@ -494,3 +497,25 @@ export const saveWaypoint = (fetchParams, params) => dispatch => {
       logging('error', res);
     }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
+
+export const getLoadingTimeout = callback => dispatch => {
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
+
+  return axios.get(`${BASE_URL}/config/getOptimizeTime/`)
+    .then(res => {
+      logging('getLoadingTimeout', res);
+
+      dispatch({
+        type: HANDLE_LOADING_TIMEOUT,
+        payload: parseInt(res.data)
+      });
+    }).catch(res => {
+      logging('error', res);
+    }).finally(() => {
+      dispatch(beginLoading({ end: eventId }));
+      callback();
+    });
+};
+
+export const next = () => dispatch => dispatch({ type: HANDLE_LOADING_NEXT_TICK });

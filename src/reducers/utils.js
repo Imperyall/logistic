@@ -7,6 +7,8 @@ import {
 	CHANGE_BLOCKS_SIZE,
 	SAVE_COMMENT,
   CHANGE_ZOOM,
+  HANDLE_LOADING_TIMEOUT,
+  HANDLE_LOADING_NEXT_TICK,
 } from '../constants/actionTypes';
 
 //import { fromJS, List } from 'immutable';
@@ -17,6 +19,8 @@ const DEFAULT_STATE = {
   drivers: [],
   cars: [],
   isLoading: [],
+  loadingTimeout: 0,
+  loadingCurrent: 0,
   windowSize: {},
   modalData: {},
   zoom: 13,
@@ -86,6 +90,25 @@ export default function utils(state = DEFAULT_STATE, action) {
       return {
         ...state,
         zoom: action.payload,
+      };
+    }
+
+    case HANDLE_LOADING_TIMEOUT: {
+      const timeout = action.payload > 0 ? action.payload + 10 : 0;
+
+      return {
+        ...state,
+        loadingTimeout: timeout,
+        loadingCurrent: timeout,
+      };
+    }
+
+    case HANDLE_LOADING_NEXT_TICK: {
+      if (state.loadingCurrent == 0) return state;
+
+      return {
+        ...state,
+        loadingCurrent: --state.loadingCurrent,
       };
     }
 

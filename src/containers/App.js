@@ -44,6 +44,7 @@ class App extends React.Component {
     this.handleStartRouteClear =     this.handleStartRouteClear.bind(this);
     this.handleMapZoom =             this.handleMapZoom.bind(this);
     this.saveWaypoint =              this.saveWaypoint.bind(this);
+    this.startLoadingTimer =         this.startLoadingTimer.bind(this);
 
     this.state = {
       fromDate: moment().format('YYYY-MM-DD'),
@@ -75,6 +76,10 @@ class App extends React.Component {
       const boundsObj = new LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east });
       this._mapComponent.fitBounds(boundsObj);
     }
+
+    if (prevProps.loadingCurrent == 0 && this.props.loadingCurrent != 0) {
+      this.startLoadingTimer();
+    }
   }
 
   getFetchParams(fullTime) {
@@ -89,6 +94,14 @@ class App extends React.Component {
       delivery_dep,
       recycled,
     };
+  }
+
+  startLoadingTimer() {
+    const end = this.props.loadingTimeout;
+    if (end > 0) {
+      const tick = setInterval(() => this.props.next(), 1000);
+      setTimeout(() => clearInterval(tick), end * 1000);
+    }
   }
 
   handleDeliveryDepsChange(event, data) {
@@ -242,7 +255,7 @@ class App extends React.Component {
       text: option.title, value: option.id
     })) : [];
 
-    const routesForOverview = Object.keys(checkedRouteIds).length == 0 ? routes : routes.filter(item => checkedRouteIds[item.id]);
+    const routesForOverview = Object.values(checkedRouteIds).includes(true) ? routes.filter(item => checkedRouteIds[item.id]) : routes;
 
     let checkedRouteIdsArray = [];
     for (let key in checkedRouteIds) {
@@ -258,6 +271,7 @@ class App extends React.Component {
       countRNK: 0,
       weightAll: 0,
       volumeAll: 0,
+      cars: [],
       routeCount: routesForOverview.length,
     };
 
@@ -269,12 +283,13 @@ class App extends React.Component {
       weightAll: acc.weightAll + +cur.weightAll,
       volumeAll: acc.volumeAll + +cur.volumeAll,
       countRNK: acc.countRNK + +cur.countRNK,
+      cars: !cur.car || acc.cars.includes(cur.car.id) ? acc.cars : [ ...acc.cars, cur.car.id ],
     }), initialOverviewData);
 
     return (
       <div id="page">
         <div id="leftSide" style={{ width: this.props.windowSize.leftWidth }}>
-          {this.props.isLoading && <Loader size="huge" active />}
+          {this.props.isLoading && <Loader size="huge" active >{this.props.loadingCurrent != 0 && `${this.props.loadingCurrent} сек.`}</Loader>}
           <Form size="tiny">
             <Form.Group>
               <Form.Select
@@ -411,9 +426,9 @@ class App extends React.Component {
                 title="Решить транспортную задачу"
                 icon="play" >
                 <Dropdown.Menu>
-                  <Dropdown.Item text="Закрепленные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', 'one')} />
-                  <Dropdown.Item text="Минимальные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', 'one')} />
-                  <Dropdown.Item text="Виртуальные ТС" onClick={() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', 'one')} />
+                  <Dropdown.Item text="Закрепленные ТС" onClick={() => this.props.getLoadingTimeout(() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', 'one'))} />
+                  <Dropdown.Item text="Минимальные ТС" onClick={() => this.props.getLoadingTimeout(() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', 'one'))} />
+                  <Dropdown.Item text="Виртуальные ТС" onClick={() => this.props.getLoadingTimeout(() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', 'one'))} />
                 </Dropdown.Menu> 
               </Dropdown>
 
@@ -694,6 +709,10 @@ App.propTypes = {
   zoom:              PropTypes.number,
   changeZoom:        PropTypes.func,
   saveWaypoint:      PropTypes.func,
+  loadingTimeout:    PropTypes.number,
+  loadingCurrent:    PropTypes.number,
+  next:              PropTypes.func,
+  getLoadingTimeout: PropTypes.func,
 };
 
 const mapStateToProps = state => ({
@@ -706,7 +725,7 @@ const mapStateToProps = state => ({
     activeWaypointId: state.points.activeWaypointId,
     bounds:           state.points.bounds,
     center:           state.points.center,
-    isLoading:        state.utils.isLoading.length !== 0,
+    isLoading:        state.utils.isLoading.length != 0 || state.utils.loadingCurrent != 0,
     windowSize:       state.utils.windowSize,
     modalData:        state.utils.modalData,
     markers:          state.points.markers,
@@ -714,6 +733,8 @@ const mapStateToProps = state => ({
     cars:             state.utils.cars,
     drivers:          state.utils.drivers,
     zoom:             state.utils.zoom,
+    loadingTimeout:   state.utils.loadingTimeout,
+    loadingCurrent:   state.utils.loadingCurrent,
 });
 
 const mapDispatchToProps = actionsMap;

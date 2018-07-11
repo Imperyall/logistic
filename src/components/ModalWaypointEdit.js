@@ -31,6 +31,7 @@ class ModalWaypointEdit extends React.Component {
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.handleSearchSelect = this.handleSearchSelect.bind(this);
     this.dragEnd =            this.dragEnd.bind(this);
+    this.handleWaypoint =     this.handleWaypoint.bind(this);
 
     this.state = clear_state;
   }
@@ -42,24 +43,28 @@ class ModalWaypointEdit extends React.Component {
       let { waypoint } = this.props.data;
       waypoint = waypoint ? waypoint.doc.waypoint : null;
 
-      this.setState(!waypoint ? clear_state : {
-        ...clear_state,
-        pk: waypoint.pk,
-        kontragent_id1: waypoint.kontragent_id1,
-        id1: waypoint.id1,
-        kontragent_title: waypoint.kontragent_title,
-        title: waypoint.title,
-        address: waypoint.address,
-        lat: waypoint.lat,
-        lng: waypoint.lng,
-        delivery_time_s: waypoint.delivery_time_s,
-        delivery_time_e: waypoint.delivery_time_e,
-        position: waypoint.position,
-        location_floor: waypoint.location_floor,
-        distance: waypoint.distance,
-        porter: waypoint.porter,
-      });
+      this.handleWaypoint(waypoint);
     }
+  }
+
+  handleWaypoint(waypoint) {
+    this.setState(!waypoint ? clear_state : {
+      ...clear_state,
+      pk: waypoint.pk,
+      kontragent_id1: waypoint.kontragent_id1,
+      id1: waypoint.id1,
+      kontragent_title: waypoint.kontragent_title,
+      title: waypoint.title,
+      address: waypoint.address,
+      lat: waypoint.lat,
+      lng: waypoint.lng,
+      delivery_time_s: waypoint.delivery_time_s,
+      delivery_time_e: waypoint.delivery_time_e,
+      position: waypoint.position,
+      location_floor: waypoint.location_floor,
+      distance: waypoint.distance,
+      porter: waypoint.porter,
+    });
   }
 
   handleSearchChange(search) {
@@ -72,7 +77,7 @@ class ModalWaypointEdit extends React.Component {
         this.setState({ search: results[0].formatted_address });
         return getLatLng(results[0]);
       }).then(latLng => this.setState({ ...latLng, center: latLng }))
-      .catch(error => console.error('Error', error));
+      .catch(error => window.notify.error(error, 'Ошибка'));
   }
 
   dragEnd(event) {
@@ -253,14 +258,10 @@ class ModalWaypointEdit extends React.Component {
                       })}
                     />
                     <div className="autocomplete-container">
-                      {suggestions.map(suggestion => {
+                      {suggestions.map((suggestion, index) => {
                         const className = suggestion.active ? 'suggestion-item--active' : 'suggestion-item';
-                        // inline style for demonstration purpose
-                        // const style = suggestion.active
-                        //             ? { backgroundColor: '#fafafa', cursor: 'pointer' }
-                        //             : { backgroundColor: '#ffffff', cursor: 'pointer' };
                         return (
-                          <div {...getSuggestionItemProps(suggestion, { className })}>
+                          <div key={`item${index}`}{...getSuggestionItemProps(suggestion, { className })}>
                             <span>{suggestion.description}</span>
                           </div>
                         );

@@ -101,6 +101,13 @@ button, .button-div {
   line-height: 1.4285em!important;
   font-size: 13px!important;
 }
+#table-overview > * > tr > * {
+  font-size: 12px!important;
+}
+.td-bold {
+  font-weight: bold;
+  text-align: right!important;
+}
 .nomargin {
   margin: 0!important;
 }

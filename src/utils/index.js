@@ -100,8 +100,8 @@ export class EventUtil {
     prop = Number((wi - nx)/wi*100);
     if (prop > 43) {
       prop = 43;
-    } else if (prop < 20) {
-      prop = 20;
+    } else if (prop < 28) {
+      prop = 28;
     }
 
     this.app.setSizeBlocks(prop);
@@ -113,7 +113,6 @@ export class EventUtil {
   }
 
   map_down() {
-    this.app.handleShowWindow(true);
     this.app.handleWindowPoint({ w_id: this.param.w_id, w_text: this.param.w_text });
   }
 
@@ -124,6 +123,7 @@ export class EventUtil {
   }
 
   map_move() {
+    this.app.handleShowWindow(true);
     document.getElementById("moveText").style.top = event.pageY + 15 + "px";
     document.getElementById("moveText").style.left = event.pageX + 15 + "px";
   }
