@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import 'semantic-ui-css/semantic.min.css';
-import { Form, Button, Loader, Dropdown, Input, Icon } from 'semantic-ui-react';
+import { Form, Button, Loader, Dropdown, Input, Icon, Checkbox } from 'semantic-ui-react';
 import GoogleMap from '../components/GoogleMap';
 import moment from 'moment';
 import * as actionsMap from '../actions';
@@ -45,6 +45,7 @@ class App extends React.Component {
     this.handleMapZoom =             this.handleMapZoom.bind(this);
     this.saveWaypoint =              this.saveWaypoint.bind(this);
     this.startLoadingTimer =         this.startLoadingTimer.bind(this);
+    this.handleChangeCluster =       this.handleChangeCluster.bind(this);
 
     this.state = {
       fromDate: moment().format('YYYY-MM-DD'),
@@ -58,6 +59,7 @@ class App extends React.Component {
       filterValue: '',
       searchDropdown: '',
       startRoute: defaultTime,
+      clustered: true,
     };
   }
 
@@ -99,9 +101,18 @@ class App extends React.Component {
   startLoadingTimer() {
     const end = this.props.loadingTimeout;
     if (end > 0) {
-      const tick = setInterval(() => this.props.next(), 1000);
-      setTimeout(() => clearInterval(tick), end * 1000);
+      if (this._loadingTick) {
+        clearInterval(this._loadingTick);
+        this._loadingTick = false;
+      }
+      
+      this._loadingTick = setInterval(() => this.props.next(), 1000);
+      setTimeout(() => clearInterval(this._loadingTick), end * 1000);
     }
+  }
+
+  handleChangeCluster() {
+    this.setState(prevState => ({ clustered: !prevState.clustered }));
   }
 
   handleDeliveryDepsChange(event, data) {
@@ -471,7 +482,7 @@ class App extends React.Component {
                               value={option.id} 
                               onClick={() => {
                                 this.handleSearchDropdown();
-                                this.props.routeEdit({ pk: checkedRouteIdsArray, driver: option.id });
+                                this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, driver: option.id });
                               }} 
                               text={option.name} />)
                           )}
@@ -505,7 +516,7 @@ class App extends React.Component {
                               value={option.id} 
                               onClick={() => {
                                 this.handleSearchDropdown();
-                                this.props.routeEdit({ pk: checkedRouteIdsArray, car: option.id });
+                                this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, car: option.id });
                               }} 
                               text={`${option.brand} - ${option.number}`} />)
                           )}
@@ -540,7 +551,7 @@ class App extends React.Component {
                         color="green"
                         onClick={() => {
                           this.handleStartRouteClear();
-                          this.props.routeEdit({ plannedTimeS: this.state.startRoute, pk: checkedRouteIdsArray });
+                          this.props.routeEdit({ fetchParams: this.getFetchParams(), plannedTimeS: this.state.startRoute, pk: checkedRouteIdsArray });
                         }} >Принять</Button>
                     </div>
                   </Dropdown.Menu>
@@ -600,6 +611,12 @@ class App extends React.Component {
             <input />
             <Icon name="search" />
           </Input>
+          <Checkbox 
+            style={{ float: 'right' }}
+            title="Группировать близлежащие точки"
+            slider
+            checked={this.state.clustered}
+            onChange={this.handleChangeCluster} />
           <Table
             routes={[...routes]}
             filter={this.state.filterValue}
@@ -615,6 +632,7 @@ class App extends React.Component {
             setActiveWaypoint={this.props.setActiveWaypoint}
             activeRouteId={this.props.activeRouteId}
             activeWaypointId={this.props.activeWaypointId}
+            duplicate={this.props.duplicate}
             modalShow={this.modalShow} />
         </div>
         <div id="buttonDivider">
@@ -636,6 +654,7 @@ class App extends React.Component {
               center={this.props.center}
               zoom={this.props.zoom}
               changeZoom={this.handleMapZoom}
+              clustered={this.state.clustered}
               //markerPosition={this.props.markerPosition}
               //markerIcon={this.props.markerIcon}
               activeWaypointId={this.props.activeWaypointId}
@@ -713,6 +732,7 @@ App.propTypes = {
   loadingCurrent:    PropTypes.number,
   next:              PropTypes.func,
   getLoadingTimeout: PropTypes.func,
+  duplicate:         PropTypes.object,
 };
 
 const mapStateToProps = state => ({
@@ -735,6 +755,7 @@ const mapStateToProps = state => ({
     zoom:             state.utils.zoom,
     loadingTimeout:   state.utils.loadingTimeout,
     loadingCurrent:   state.utils.loadingCurrent,
+    duplicate:        state.points.duplicate,
 });
 
 const mapDispatchToProps = actionsMap;

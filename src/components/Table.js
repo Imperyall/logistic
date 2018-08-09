@@ -62,12 +62,20 @@ class RouteTable extends React.Component {
 
         if (openSort && this.props.openRouteIds[routeSort]) {
           indexes = indexes.sort((a,b) => {
+            let cur = a, next = b;
+            
+            if (["id1", "sku", "weight", "volumeAll", "pallet"].indexOf(thSort) !== -1) {
+              cur = a.doc; next = b.doc;
+            } else if (["title", "address"].indexOf(thSort) !== -1) {
+              cur = a.doc.waypoint; next = b.doc.waypoint;
+            }
+
             if (["num", "sku", "weight", "volumeAll", "pallet", "distance"].indexOf(thSort) === -1) {
-              if (a[thSort] > b[thSort]) return order * -1; else
-              if (a[thSort] < b[thSort]) return order * 1;  else
-              if (a[thSort] === b[thSort]) return 0;
+              if (cur[thSort] > next[thSort]) return order * -1; else
+              if (cur[thSort] < next[thSort]) return order * 1;  else
+              if (cur[thSort] === next[thSort]) return 0;
             } else {
-              return order * (+b[thSort] - +a[thSort]);
+              return order * (+next[thSort] - +cur[thSort]);
             }
           });
         }
@@ -89,6 +97,7 @@ class RouteTable extends React.Component {
               modalShow={this.props.modalShow}
               onClick={e => this.props.setActiveWaypoint({ routeIndex: index, waypointIndex: index2, add: e.ctrlKey })}
               active={active}
+              duplicate={this.props.duplicate}
               filter={this.props.filter}
             />
           );
@@ -138,6 +147,7 @@ class RouteTable extends React.Component {
           ifOpen={!!this.props.openRouteIds[route.id]}
           state={this.state}
           clickFilter={clickFilter}
+          duplicate={this.props.duplicate}
           onToggleOpen={e => {
             e.stopPropagation();
             this.props.toggleOpenRoute(route.id);
@@ -197,6 +207,7 @@ RouteTable.propTypes = {
   setCheckedRoute:   PropTypes.func,
   toggleOpenRoute:   PropTypes.func,
   openRouteIds:      PropTypes.object,
+  duplicate:         PropTypes.object,
 };
 
 export default DragDropContext(HTML5Backend)(RouteTable);

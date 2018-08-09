@@ -55,6 +55,7 @@ const RouteRow = props => {
     rowTitle,
     ifOpen,
     state,
+    duplicate,
   } = props;
 
   const titleText = {
@@ -107,7 +108,8 @@ const RouteRow = props => {
       </Th>
       <Th className={getFilterClass('id1')}
           onClick={e => ifOpen && props.clickFilter(route.id, 'id1', e)}
-          title={ifOpen && titleText.id1}>
+          title={ifOpen ? titleText.id1 : ''}>
+        {duplicate.hasOwnProperty(route.id) && <span><Icon name="exclamation" color="red" /></span>}
         {route.autocreated && <span><Icon name="desktop" color="blue" /></span>}
         {route.recycled && <span><Icon name="remove circle" color="red" /></span>}
         {route.accepted && <span><Icon name="check circle" color="yellow" /></span>}

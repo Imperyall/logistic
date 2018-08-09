@@ -19,6 +19,7 @@ const DEFAULT_STATE = {
   activeWaypointId: null,
   bounds: null,
   markers: [],
+  duplicate: {},
   center: { lat: 45.0392651, lng: 39.0817043 },
 };
 
@@ -42,41 +43,61 @@ const getRandomString = () => Math.random().toString(36).substring(7);
 export default function points(state = DEFAULT_STATE, action) {
 	switch (action.type) {
 		case FETCH_ROUTES_SUCCESS: {
-      return {
-				...state,
-				routes: action.payload.map((item, index) => {
-          let [count, weightAll, volumeAll, sku, pallet, serviceTimeAll] = [ [], 0, 0, 0, 0, 0 ];
-          let indexes = [];
+      let waypoints = {};
+      let duplicate = {};
 
-          for (let i in item.index) {
-            const doc = item.index[i].doc, current = item.index[i];
-            const position = { lat: +doc.waypoint.lat, lng: +doc.waypoint.lng };
+      const routes = action.payload.map((item, index) => {
+        let [count, weightAll, volumeAll, sku, pallet, serviceTimeAll] = [ [], 0, 0, 0, 0, 0 ];
+        let indexes = [];
 
-            let single = true;
-            if (!indexes.find(ind => ind.lat == position.lat && ind.lng == position.lng)) indexes.push(position); else single = false;
+        for (let i in item.index) {
+          const doc = item.index[i].doc, current = item.index[i];
+          const waypoint = (doc && 'waypoint' in doc) ? doc.waypoint : false;
 
-            count = count.indexOf(doc.waypoint.pk) === -1 ? [ ...count, doc.waypoint.pk ] : count;
+          const position = { lat: waypoint ? +waypoint.lat : 0, lng: waypoint ? +waypoint.lng : 0 };
+
+          if (!item.collection && !item.bin && waypoint) {
+            for (let w in waypoints) {
+              if (w != item.id && waypoints[w].includes(waypoint.pk)) {
+                if (!Array.isArray(duplicate[item.id])) duplicate[item.id] = [];
+                if (!Array.isArray(duplicate[w])) duplicate[w] = [];
+                if (!duplicate[w].includes(waypoint.pk)) duplicate[w].push(waypoint.pk);
+                if (!duplicate[item.id].includes(waypoint.pk)) duplicate[item.id].push(waypoint.pk);
+              }
+            }
+
+            if (!Array.isArray(waypoints[item.id])) waypoints[item.id] = [];
+            waypoints[item.id].push(waypoint.pk);
+          }
+
+          let single = true;
+          if (!indexes.find(ind => ind.lat == position.lat && ind.lng == position.lng)) indexes.push(position); else single = false;
+
+          count = waypoint && count.indexOf(waypoint.pk) === -1 ? [ ...count, waypoint.pk ] : count;
+          serviceTimeAll += +current.service_time;
+          item.index[i] = { ...current, title: single ? (+i + 1).toString() : '', single };
+          if (doc) {
             weightAll += +doc.weight;
             volumeAll += +doc.volume;
             sku += +doc.sku;
             pallet += +doc.pallet;
-            serviceTimeAll += +current.service_time;
-            item.index[i] = { ...current, title: single ? (+i + 1).toString() : '', single };
           }
+        }
 
-          return {
-            ...item, 
-            countRNK: item.index.length,
-            count: count.length,//: item.index.reduce((acc, cur) => acc.indexOf(cur.doc.waypoint.pk) === -1 ? [ ...acc, cur.doc.waypoint.pk ] : acc, []).length,
-            weightAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.weight), 0).toFixed(),
-            volumeAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.volume), 0).toFixed(3),
-            sku,
-            pallet,
-            serviceTimeAll,
-            color: getRouteColor(index)
-          };
-        }),
-      };
+        return {
+          ...item, 
+          countRNK: item.index.length,
+          count: count.length,//: item.index.reduce((acc, cur) => acc.indexOf(cur.doc.waypoint.pk) === -1 ? [ ...acc, cur.doc.waypoint.pk ] : acc, []).length,
+          weightAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.weight), 0).toFixed(),
+          volumeAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.volume), 0).toFixed(3),
+          sku,
+          pallet,
+          serviceTimeAll,
+          color: getRouteColor(index)
+        };
+      });
+
+      return { ...state, routes, duplicate };
     }
 
     case TOGGLE_OPEN_ROUTE: {

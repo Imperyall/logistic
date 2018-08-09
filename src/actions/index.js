@@ -107,7 +107,10 @@ export const optimizeAllRoutes = (fetchParams, pk, opts, bases) => dispatch => {
       dispatch(fetchRoutes(fetchParams));
     }).catch(res => {
       logging('error', res);
-    }).finally(() => dispatch(beginLoading({ end: eventId })));
+    }).finally(() => {
+      dispatch(beginLoading({ end: eventId }));
+      dispatch(next(true));
+    });
 };
 
 export const addRoutes = fetchParams => dispatch => {
@@ -510,12 +513,10 @@ export const getLoadingTimeout = callback => dispatch => {
         type: HANDLE_LOADING_TIMEOUT,
         payload: parseInt(res.data)
       });
+      callback();
     }).catch(res => {
       logging('error', res);
-    }).finally(() => {
-      dispatch(beginLoading({ end: eventId }));
-      callback();
-    });
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
-export const next = () => dispatch => dispatch({ type: HANDLE_LOADING_NEXT_TICK });
+export const next = stop => dispatch => dispatch({ type: HANDLE_LOADING_NEXT_TICK, payload: stop });

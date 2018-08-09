@@ -8,7 +8,7 @@ const Overview = ({ data }) => (
     <Table.Body>
       <Table.Row>
         <Table.Cell>Общ. расстояние</Table.Cell>
-        <Table.Cell className="td-bold">{(data.distance / 1000).toFixed(1)}</Table.Cell>
+        <Table.Cell className="td-bold">{(data.distance).toFixed(1)}</Table.Cell>
         <Table.Cell>Ср. вес заявки</Table.Cell>
         <Table.Cell className="td-bold">{data.count > 0 ? (data.weightAll / (data.count * 1000)).toFixed(3) : '-'}</Table.Cell>
       </Table.Row>
@@ -28,13 +28,13 @@ const Overview = ({ data }) => (
         <Table.Cell>Общ. кол-во РНК</Table.Cell>
         <Table.Cell className="td-bold">{data.countRNK}</Table.Cell>
         <Table.Cell>Ср. пробег на ТТ</Table.Cell>
-        <Table.Cell className="td-bold">{data.count > 0 ? (data.distance / (data.count * 1000)).toFixed(1) : '-'}</Table.Cell>
+        <Table.Cell className="td-bold">{data.count > 0 ? (data.distance / data.count).toFixed(1) : '-'}</Table.Cell>
       </Table.Row>
       <Table.Row>
         <Table.Cell>Общ. масса (т)</Table.Cell>
         <Table.Cell className="td-bold">{(data.weightAll / 1000).toFixed(1)}</Table.Cell>
         <Table.Cell>Ср. пробег за рейс</Table.Cell>
-        <Table.Cell className="td-bold">{data.routeCount > 0 ? (data.distance / (data.routeCount * 1000)).toFixed(1) : '-'}</Table.Cell>
+        <Table.Cell className="td-bold">{data.routeCount > 0 ? (data.distance / data.routeCount).toFixed(1) : '-'}</Table.Cell>
       </Table.Row>
       <Table.Row>
         <Table.Cell>Общ. объем (м3)</Table.Cell>
@@ -55,8 +55,8 @@ const Overview = ({ data }) => (
         <Table.Cell className="td-bold">{data.routeCount > 0 && data.cars.length > 0 ? ((data.duration / data.routeCount) / (data.count / data.cars.length * 60)).toFixed() : '-'}</Table.Cell>
       </Table.Row>
       <Table.Row>
-        <Table.Cell></Table.Cell>
-        <Table.Cell className="td-bold"></Table.Cell>
+        <Table.Cell />
+        <Table.Cell className="td-bold" />
         <Table.Cell>Вторые рейсы</Table.Cell>
         <Table.Cell className="td-bold">{data.routeCount - data.cars.length}</Table.Cell>
       </Table.Row>

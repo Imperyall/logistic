@@ -104,6 +104,7 @@ export default function utils(state = DEFAULT_STATE, action) {
     }
 
     case HANDLE_LOADING_NEXT_TICK: {
+      if (action.payload) return { ...state, loadingCurrent: 0 };
       if (state.loadingCurrent == 0) return state;
 
       return {

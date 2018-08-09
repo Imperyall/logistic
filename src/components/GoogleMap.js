@@ -17,6 +17,44 @@ const arrowSymbol = { path: 'M0,-1 L0,1 L3,0 z', rotation: -90 };
 
 const maxZoom = 17;
 
+const createPoints = props => ([
+  props.routes && props.routes.reduce((acc, cur, rIndex) => {
+    if (props.checkedRouteIds[cur.id]) {
+      return [
+        ...acc,
+        ...cur.index.map((waypoint, index) => {
+          const color = isActiveWaypoint(props.activeWaypointId, waypoint.id) ? '#f00' : cur.color;
+          const pos = { lat: +waypoint.doc.waypoint.lat, lng: +waypoint.doc.waypoint.lng };
+
+          return (
+            <Marker
+              key={`m${waypoint.id}`}
+              position={pos}
+              onMouseDown={() => new EventUtil({ type: 'GOOGLEMAP', app: props.app, param: { w_text: waypoint.doc.id1, w_id: waypoint.id } })}
+              onClick={() => props.setActiveWaypoint({ routeIndex: rIndex, waypointIndex: index, scroll: cur.id })}
+              label={waypoint.title}
+              icon={generateIcon(color)}
+            />
+          );
+        }),
+        ...renderRoutePolylines(cur, props.activeWaypointId)
+      ];
+    }
+    return [...acc];
+  }, []),
+  props.markers && props.markers.map(waypoint => {
+    return (
+      <Marker
+        key={`m${waypoint.id}`}
+        position={{ lat: +waypoint.lat, lng: +waypoint.lng }}
+        draggable={true}
+        onDragEnd={props.dragEnd}
+        icon={`https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=1|f00|000000`}
+      />
+    );
+  })
+]);
+
 const renderRoutePolylines = (route, activeWaypointId) => route.index.map(waypoint => (
   <Polyline
     key={`p${waypoint.id}`}
@@ -49,52 +87,18 @@ export default withGoogleMap(props => (
     options={{
       draggable: !props.lockMap,
     }}
-    center={props.center}
-  >
-    <MarkerClusterer
-      // onClick={() => props.handleLockMap(false)}
-      averageCenter
-      enableRetinaIcons
-      maxZoom={maxZoom}
-      gridSize={60}
-    >
-      {[
-        props.routes && props.routes.reduce((acc, cur, rIndex) => {
-          if (props.checkedRouteIds[cur.id]) {
-            return [
-              ...acc,
-              ...cur.index.map((waypoint, index) => {
-                const color = isActiveWaypoint(props.activeWaypointId, waypoint.id) ? '#f00' : cur.color;
-                const pos = { lat: +waypoint.doc.waypoint.lat, lng: +waypoint.doc.waypoint.lng };
-
-                return (
-                  <Marker
-                    key={`m${waypoint.id}`}
-                    position={pos}
-                    onMouseDown={() => new EventUtil({ type: 'GOOGLEMAP', app: props.app, param: { w_text: waypoint.doc.id1, w_id: waypoint.id } })}
-                    onClick={() => props.setActiveWaypoint({ routeIndex: rIndex, waypointIndex: index, scroll: cur.id })}
-                    label={waypoint.title}
-                    icon={generateIcon(color)}
-                  />
-                );
-              }),
-              ...renderRoutePolylines(cur, props.activeWaypointId)
-            ];
-          }
-          return [...acc];
-        }, []),
-        props.markers && props.markers.map(waypoint => {
-          return (
-            <Marker
-              key={`m${waypoint.id}`}
-              position={{ lat: +waypoint.lat, lng: +waypoint.lng }}
-              draggable={true}
-              onDragEnd={props.dragEnd}
-              icon={`https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=1|f00|000000`}
-            />
-          );
-        })
-      ]}
-    </MarkerClusterer>
+    center={props.center} >
+    {
+      props.clustered
+      ? <MarkerClusterer
+          // onClick={() => props.handleLockMap(false)}
+          averageCenter
+          enableRetinaIcons
+          maxZoom={maxZoom}
+          gridSize={60} >
+          {createPoints(props)}
+        </MarkerClusterer>
+      : createPoints(props)
+    }
   </GoogleMap>
 ));

@@ -54,11 +54,11 @@ const collect2 = (connect, monitor) => {
 
 class Waypoint extends React.Component {
   render() {
-    const { connectDragSource, connectDropTarget, isDragging, filter, waypoint, active, rowTitle, rowId } = this.props;
+    const { connectDragSource, connectDropTarget, isDragging, filter, waypoint, active, rowTitle, rowId, duplicate } = this.props;
     const style={
       cursor: 'move',
       opacity: isDragging ? 0.95 : 1,
-      backgroundColor: active ? '#e0e0e0' : null,
+      backgroundColor: active ? '#e0e0e0' : (duplicate.hasOwnProperty(rowId) && waypoint.doc.waypoint && duplicate[rowId].includes(waypoint.doc.waypoint.pk) ? '#ffb7b7' : null),
       padding: ".2em",
     };
 
@@ -130,6 +130,7 @@ Waypoint.propTypes = {
   onClick:           PropTypes.func,
   modalShow:         PropTypes.func,
   index:             PropTypes.object,
+  duplicate:         PropTypes.object,
 };
 
 const x = DropTarget(dragTypes.WAYPOINT, waypointTarget, collect)(Waypoint);
