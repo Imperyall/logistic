@@ -491,7 +491,7 @@ export const saveWaypoint = (fetchParams, params) => dispatch => {
   let data = new URLSearchParams();
   for (let key in params) data.append(key, params[key]);
 
-  return axios.post(`${BASE_URL}/waypoints/edit/${params.pk}/`, data)
+  return axios.post(`${BASE_URL}/routes/index_edit/${params.pk}/`, data)
     .then(res => {
       logging('saveWaypoint', res);
 

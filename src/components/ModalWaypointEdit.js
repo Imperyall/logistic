@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Modal, Form, TextArea, Checkbox } from 'semantic-ui-react';
+import { Button, Modal, Form, TextArea, Checkbox, Divider } from 'semantic-ui-react';
 import GoogleMap from './GoogleMap';
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 
@@ -20,6 +20,11 @@ const clear_state = {
   porter: false,
   center: null,
   search: '',
+  service_time: '',
+  volume: '',
+  weight: '',
+  doc_delivery_time_s: '',
+  doc_delivery_time_e: '',
 };
 
 class ModalWaypointEdit extends React.Component {
@@ -41,7 +46,17 @@ class ModalWaypointEdit extends React.Component {
 
     if (open != this.props.data.open && !open) {
       let { waypoint } = this.props.data;
-      waypoint = waypoint ? waypoint.doc.waypoint : null;
+      
+      waypoint = waypoint 
+        ? { 
+          ...waypoint.doc.waypoint,  
+          pk: waypoint.id,
+          service_time: waypoint.service_time,
+          volume: waypoint.doc.volume,
+          weight: waypoint.doc.weight,
+          doc_delivery_time_s: waypoint.doc.delivery_time_s,
+          doc_delivery_time_e: waypoint.doc.delivery_time_e,
+        } : null;
 
       this.handleWaypoint(waypoint);
     }
@@ -64,6 +79,11 @@ class ModalWaypointEdit extends React.Component {
       location_floor: waypoint.location_floor,
       distance: waypoint.distance,
       porter: waypoint.porter,
+      service_time: waypoint.service_time,
+      volume: waypoint.volume,
+      weight: waypoint.weight,
+      doc_delivery_time_s: waypoint.doc_delivery_time_s,
+      doc_delivery_time_e: waypoint.doc_delivery_time_e,
     });
   }
 
@@ -239,6 +259,60 @@ class ModalWaypointEdit extends React.Component {
                 checked={this.state.porter}
                 onChange={this.handleInputChange}
                 label="Наличие грузчика" />
+            </Form.Field>
+            <Divider />
+            <label>Изменение накладной</label>
+            <Form.Field>
+              <label>
+                Время приема (в сек):
+                <input 
+                  name="service_time"
+                  type="number"
+                  value={this.state.service_time}
+                  onChange={this.handleInputChange} />
+              </label>
+            </Form.Field>
+            <Form.Field>
+              <label>
+                Объём:
+                <input 
+                  name="volume"
+                  type="number"
+                  value={this.state.volume}
+                  onChange={this.handleInputChange}
+                  placeholder="Объём" />
+              </label>
+            </Form.Field>
+            <Form.Field>
+              <label>
+                Вес:
+                <input 
+                  name="weight"
+                  type="number"
+                  value={this.state.weight}
+                  onChange={this.handleInputChange}
+                  placeholder="Вес" />
+              </label>
+            </Form.Field>
+            <Form.Field>
+              <label>
+                Время приема с:
+                <input 
+                  name="doc_delivery_time_s"
+                  type="time"
+                  value={this.state.doc_delivery_time_s}
+                  onChange={this.handleInputChange} />
+              </label>
+            </Form.Field>
+            <Form.Field>
+              <label>
+                Время приема по:
+                <input 
+                  name="doc_delivery_time_e"
+                  type="time"
+                  value={this.state.doc_delivery_time_e}
+                  onChange={this.handleInputChange} />
+              </label>
             </Form.Field>
           </Form>
 
