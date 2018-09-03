@@ -32,7 +32,7 @@ const logging = (fun, response) => {
   //process.env.NODE_ENV === 'development' && 
   console.log(`[RESPONSE][${fun}]`, response.data && response.data.length && response.headers['content-type'] != 'text/html; charset=utf-8' ? response.data : 'null');
 
-  if (response.data && response.data.hasOwnProperty('code')) notify(response.data.code, response.data.text);
+  if (response.data && 'code' in response.data) notify(response.data.code, response.data.text);
 };
 
 const notify = (type, text) => {

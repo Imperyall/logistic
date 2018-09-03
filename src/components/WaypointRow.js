@@ -63,10 +63,10 @@ class Waypoint extends React.Component {
     };
 
     const filterClass = value => {
-      if (!filter) return 'null';
+      if (!filter) return '';
       value = Array.isArray(value) ? value : [value];
       for (let val of value) {
-        return val !== null && String(val).toLowerCase().indexOf(filter.toLowerCase()) !== -1 ? 'activeFilter' : null;
+        return val !== null && String(val).toLowerCase().indexOf(filter.toLowerCase()) !== -1 ? 'activeFilter' : '';
       }
     };
 
@@ -82,7 +82,13 @@ class Waypoint extends React.Component {
         <Table.Cell className={filterClass(waypoint.doc.id1)}>{waypoint.doc.waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.doc.id1}</small><br/><span style={{ fontSize: '8px' }}>({waypoint.id})</span></Table.Cell>
         <Table.Cell className={filterClass(waypoint.doc.waypoint.title)}><small>{waypoint.doc.waypoint.title}</small></Table.Cell>
         <Table.Cell className={filterClass(waypoint.doc.delivery_dep)}><small>{waypoint.doc.delivery_dep}</small></Table.Cell>
-        <Table.Cell className={filterClass(waypoint.doc.waypoint.address)} colSpan="3"><small>{waypoint.doc.waypoint.address}</small></Table.Cell>
+        <Table.Cell className={filterClass(waypoint.doc.waypoint.address)} colSpan="3">
+          <small style={{ display: 'grid' }}>
+            <span>{waypoint.doc.waypoint.address}</span>
+            {waypoint.doc.info_ol && <span className="doc-info-span">инф. ОЛ: {waypoint.doc.info_ol}</span>}
+            {waypoint.doc.info_driver && <span className="doc-info-span">инф. для водит.: {waypoint.doc.info_driver}</span>}
+          </small>
+        </Table.Cell>
         {/*<Table.Cell><small>{(+waypoint.weight).toFixed()}</small></Table.Cell>*/}
         <Table.Cell><small>{waypoint.doc.sku}</small></Table.Cell>
         <Table.Cell><small>{(+waypoint.doc.weight).toFixed()} кг</small></Table.Cell>

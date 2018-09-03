@@ -174,9 +174,9 @@ class App extends React.Component {
       const value = {
         'hour': moment(time, "HH:mm").get('hour'), 
         'minute': moment(time, "HH:mm").get('minute'),
-        'year': moment(this.state.startRoute).get('year'),
-        'month': moment(this.state.startRoute).get('month'),
-        'date': moment(this.state.startRoute).get('date'),
+        'year': moment(new Date(this.state.startRoute)).get('year'),
+        'month': moment(new Date(this.state.startRoute)).get('month'),
+        'date': moment(new Date(this.state.startRoute)).get('date'),
       };
 
       this.setState({ startRoute: moment().set(value).format(fullTimeFormat) });
@@ -185,11 +185,10 @@ class App extends React.Component {
 
   handleStartRouteDate(event) {
     const time = event.target.value;
-    
     if (moment(time).isValid()) {
       const value = {
-        'hour': moment(this.state.startRoute, "HH:mm").get('hour'), 
-        'minute': moment(this.state.startRoute, "HH:mm").get('minute'),
+        'hour': moment(new Date(this.state.startRoute)).get('hour'), 
+        'minute': moment(new Date(this.state.startRoute)).get('minute'),
         'year': moment(time).get('year'),
         'month': moment(time).get('month'),
         'date': moment(time).get('date'),

@@ -46,7 +46,7 @@ class ModalWaypointEdit extends React.Component {
 
     if (open != this.props.data.open && !open) {
       let { waypoint } = this.props.data;
-      
+
       waypoint = waypoint 
         ? { 
           ...waypoint.doc.waypoint,  
@@ -79,7 +79,7 @@ class ModalWaypointEdit extends React.Component {
       location_floor: waypoint.location_floor,
       distance: waypoint.distance,
       porter: waypoint.porter,
-      service_time: waypoint.service_time,
+      service_time: (waypoint.service_time / 60).toFixed(),
       volume: waypoint.volume,
       weight: waypoint.weight,
       doc_delivery_time_s: waypoint.doc_delivery_time_s,
@@ -264,7 +264,7 @@ class ModalWaypointEdit extends React.Component {
             <label>Изменение накладной</label>
             <Form.Field>
               <label>
-                Время приема (в сек):
+                Время приема (в мин):
                 <input 
                   name="service_time"
                   type="number"
