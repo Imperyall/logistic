@@ -24,13 +24,13 @@ const createPoints = props => ([
         ...acc,
         ...cur.index.map((waypoint, index) => {
           const color = isActiveWaypoint(props.activeWaypointId, waypoint.id) ? '#f00' : cur.color;
-          const pos = { lat: +waypoint.doc.waypoint.lat, lng: +waypoint.doc.waypoint.lng };
+          const pos = { lat: +waypoint.doc[0].waypoint.lat, lng: +waypoint.doc[0].waypoint.lng };
 
           return (
             <Marker
               key={`m${waypoint.id}`}
               position={pos}
-              onMouseDown={() => new EventUtil({ type: 'GOOGLEMAP', app: props.app, param: { w_text: waypoint.doc.id1, w_id: waypoint.id } })}
+              onMouseDown={() => new EventUtil({ type: 'GOOGLEMAP', app: props.app, param: { w_text: waypoint.doc[0].id1, w_id: waypoint.id } })}
               onClick={() => props.setActiveWaypoint({ routeIndex: rIndex, waypointIndex: index, scroll: cur.id })}
               label={waypoint.title}
               icon={generateIcon(color)}

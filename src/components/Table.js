@@ -105,7 +105,9 @@ class RouteTable extends React.Component {
 
         if (ifFilter) {
           indexes = indexes.filter(waypoint => {
-            waypoint = waypoint.props.waypoint.doc;
+            const docs = waypoint.props.waypoint.doc;
+            if (!docs.length) return false;
+
             const props = [
               //'num',
               'address',
@@ -121,9 +123,12 @@ class RouteTable extends React.Component {
               //'weight',
             ];
 
-            for (const prop of props) {
-              if (prop == 'address') waypoint = waypoint.waypoint;
-              if (waypoint.hasOwnProperty(prop) && waypoint[prop] !== null && String(waypoint[prop]).toLowerCase().indexOf(this.props.filter.toLowerCase()) !== -1) return true;
+            for (let i in docs) {
+              for (let prop of props) {
+                waypoint = (prop == 'address') ? docs[i].waypoint : docs[i];
+                if (prop in waypoint && waypoint[prop].search(new RegExp(this.props.filter, "gi")) !== -1) return true;
+                // if (waypoint.hasOwnProperty(prop) && waypoint[prop] !== null && String(waypoint[prop]).toLowerCase().indexOf(this.props.filter.toLowerCase()) !== -1) return true;
+              }
             }
 
             return false;

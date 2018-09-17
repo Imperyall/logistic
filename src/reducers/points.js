@@ -29,7 +29,7 @@ const getRouteBounds = route => {
     const points = route.index.map(index => (
       index.geometry 
       ? index.geometry.split(',').map(item => window.google.maps.geometry.encoding.decodePath(item)).reduce((prev, next) => [...prev, ...next])
-      : [new window.google.maps.LatLng(index.doc.waypoint.lat, index.doc.waypoint.lng)]
+      : [new window.google.maps.LatLng(index.doc[0].waypoint.lat, index.doc[0].waypoint.lng)]
     )).reduce((prev, next) => [...prev, ...next]);
 
     points.forEach(point => bounds.extend(point));
@@ -47,12 +47,12 @@ export default function points(state = DEFAULT_STATE, action) {
       let duplicate = {};
 
       const routes = action.payload.map((item, index) => {
-        let [count, weightAll, volumeAll, sku, pallet, serviceTimeAll] = [ [], 0, 0, 0, 0, 0 ];
+        let [count, countRNK, weightAll, volumeAll, sku, pallet, serviceTimeAll] = [ [], 0, 0, 0, 0, 0, 0 ];
         let indexes = [];
 
         for (let i in item.index) {
           const doc = item.index[i].doc, current = item.index[i];
-          const waypoint = (doc && 'waypoint' in doc) ? doc.waypoint : false;
+          const waypoint = (doc.length && 'waypoint' in Object(doc[0])) ? doc[0].waypoint : false;
 
           const position = { lat: waypoint ? +waypoint.lat : 0, lng: waypoint ? +waypoint.lng : 0 };
 
@@ -76,18 +76,19 @@ export default function points(state = DEFAULT_STATE, action) {
           count = waypoint && count.indexOf(waypoint.pk) === -1 ? [ ...count, waypoint.pk ] : count;
           serviceTimeAll += +current.service_time;
           item.index[i] = { ...current, title: single ? (+i + 1).toString() : '', single };
-          if (doc) {
-            weightAll += +doc.weight;
-            volumeAll += +doc.volume;
-            sku += +doc.sku;
-            pallet += +doc.pallet;
+          for (let d in doc) {
+            weightAll += +doc[d].weight;
+            volumeAll += +doc[d].volume;
+            sku += +doc[d].sku;
+            pallet += +doc[d].pallet;
+            countRNK += 1;
           }
         }
 
         return {
           ...item, 
-          countRNK: item.index.length,
-          count: count.length,//: item.index.reduce((acc, cur) => acc.indexOf(cur.doc.waypoint.pk) === -1 ? [ ...acc, cur.doc.waypoint.pk ] : acc, []).length,
+          countRNK,
+          count: item.index.length,//: item.index.reduce((acc, cur) => acc.indexOf(cur.doc.waypoint.pk) === -1 ? [ ...acc, cur.doc.waypoint.pk ] : acc, []).length,
           weightAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.weight), 0).toFixed(),
           volumeAll,//: item.index.reduce((acc, cur) => (acc + +cur.doc.volume), 0).toFixed(3),
           sku,
@@ -192,7 +193,7 @@ export default function points(state = DEFAULT_STATE, action) {
 
               for (let key in wa) {
                 if (!markers[i]) markers[i] = new Array();
-                markers[i].push({ lat: +wa[key].doc.waypoint.lat, lng: +wa[key].doc.waypoint.lng });
+                markers[i].push({ lat: +wa[key].doc[0].waypoint.lat, lng: +wa[key].doc[0].waypoint.lng });
               }
             }
 
@@ -205,7 +206,7 @@ export default function points(state = DEFAULT_STATE, action) {
         if (value) {
           for (let key of waypoints) {
             if (!markers[routeIndex]) markers[routeIndex] = new Array();
-            markers[routeIndex].push({ lat: +key.doc.waypoint.lat, lng: +key.doc.waypoint.lng });
+            markers[routeIndex].push({ lat: +key.doc[0].waypoint.lat, lng: +key.doc[0].waypoint.lng });
           }
         } else {
           delete markers[routeIndex];
@@ -251,7 +252,7 @@ export default function points(state = DEFAULT_STATE, action) {
 			}
 
 			//if (value) {
-			newState = { ...newState, center: { lat: +waypoint.doc.waypoint.lat, lng: +waypoint.doc.waypoint.lng } };
+			newState = { ...newState, center: { lat: +waypoint.doc[0].waypoint.lat, lng: +waypoint.doc[0].waypoint.lng } };
 			//}
 
 			return {

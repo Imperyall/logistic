@@ -55,10 +55,18 @@ const collect2 = (connect, monitor) => {
 class Waypoint extends React.Component {
   render() {
     const { connectDragSource, connectDropTarget, isDragging, filter, waypoint, active, rowTitle, rowId, duplicate } = this.props;
+    const docs = waypoint.doc.length;
     const style={
       cursor: 'move',
       opacity: isDragging ? 0.95 : 1,
-      backgroundColor: active ? '#e0e0e0' : (duplicate.hasOwnProperty(rowId) && waypoint.doc.waypoint && duplicate[rowId].includes(waypoint.doc.waypoint.pk) ? '#ffb7b7' : null),
+      backgroundColor: active 
+        ? '#e0e0e0' 
+        : (duplicate.hasOwnProperty(rowId) 
+            && docs
+            && waypoint.doc[0].waypoint 
+            && duplicate[rowId].includes(waypoint.doc[0].waypoint.pk) 
+              ? '#ffb7b7' 
+              : null),
       padding: ".2em",
     };
 
@@ -78,44 +86,65 @@ class Waypoint extends React.Component {
           onClick={this.props.onClick}
           onMouseEnter={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: rowId, r_text: rowTitle }); }}
           onMouseLeave={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: 0, r_text: null }); }} >
-        <Table.Cell><small>{waypoint.num}</small></Table.Cell>
-        <Table.Cell className={filterClass(waypoint.doc.id1)}>{waypoint.doc.waypoint.base && <Icon name="home" color="green" />}<small>{waypoint.doc.id1}</small><br/><span style={{ fontSize: '8px' }}>({waypoint.id})</span></Table.Cell>
-        <Table.Cell className={filterClass(waypoint.doc.waypoint.title)}><small>{waypoint.doc.waypoint.title}</small></Table.Cell>
-        <Table.Cell className={filterClass(waypoint.doc.delivery_dep)}><small>{waypoint.doc.delivery_dep}</small></Table.Cell>
-        <Table.Cell className={filterClass(waypoint.doc.waypoint.address)} colSpan="3">
-          <small style={{ display: 'grid' }}>
-            <span>{waypoint.doc.waypoint.address}</span>
-            {waypoint.doc.info_ol && <span className="doc-info-span">инф. ОЛ: {waypoint.doc.info_ol}</span>}
-            {waypoint.doc.info_driver && <span className="doc-info-span">инф. для водит.: {waypoint.doc.info_driver}</span>}
-          </small>
+        <Table.Cell>
+          <small>{waypoint.num}</small>
+        </Table.Cell>
+        <Table.Cell className={filterClass(waypoint.doc[0].id1)}>
+          <small style={{ display: 'grid' }}>{waypoint.doc.map((doc, index) => (<span key={`id1${index}`}>{doc.id1}</span>))}</small>
+          <span style={{ fontSize: '8px' }}>({waypoint.id})</span>
         </Table.Cell>
         {/*<Table.Cell><small>{(+waypoint.weight).toFixed()}</small></Table.Cell>*/}
-        <Table.Cell><small>{waypoint.doc.sku}</small></Table.Cell>
-        <Table.Cell><small>{(+waypoint.doc.weight).toFixed()} кг</small></Table.Cell>
-        <Table.Cell><small>{waypoint.doc.volume} м3</small></Table.Cell>
-        <Table.Cell><small>{(+waypoint.doc.pallet).toFixed(2)} паллет</small></Table.Cell>
-        <Table.Cell><small>{(waypoint.distance / 1000).toFixed()} ({waypoint.distance > 0 && ((waypoint.distance / waypoint.duration) * 3.6).toFixed()} км/ч)</small></Table.Cell>
-        <Table.Cell><small>{`${moment(waypoint.doc.delivery_time_s, "HH:mm:ss").format("HH:mm")} - ${moment(waypoint.doc.delivery_time_e, "HH:mm:ss").format("HH:mm")}`}</small></Table.Cell>
-        <Table.Cell><small>{pprintSeconds(+waypoint.service_time)} ({`${moment(waypoint.planned_time_s).format("HH:mm")} - ${moment(waypoint.planned_time_e).format("HH:mm")}`})</small></Table.Cell>
+        <Table.Cell>
+          <small style={{ display: 'grid' }}>{waypoint.doc.map((doc, index) => (<span key={`sku${index}`}>{doc.sku}</span>))}</small>
+        </Table.Cell>
+        <Table.Cell>
+          <small style={{ display: 'grid' }}>{waypoint.doc.map((doc, index) => (<span key={`weight${index}`}>{(+doc.weight).toFixed()}</span>))}</small>
+        </Table.Cell>
+        <Table.Cell>
+          <small style={{ display: 'grid' }}>{waypoint.doc.map((doc, index) => (<span key={`volume${index}`}>{doc.volume}</span>))}</small>
+        </Table.Cell>
+        <Table.Cell>
+        <small style={{ display: 'grid' }}>{waypoint.doc.map((doc, index) => (<span key={`pallet${index}`}>{(+doc.pallet).toFixed(2)}</span>))}</small>
+        </Table.Cell>
+        <Table.Cell className={filterClass(waypoint.doc[0].waypoint.title)}>
+          <small>{waypoint.doc[0].waypoint.title}</small>
+        </Table.Cell>
+        <Table.Cell className={filterClass(waypoint.doc[0].delivery_dep)}>
+          <small>{waypoint.doc[0].delivery_dep}</small>
+        </Table.Cell>
+        <Table.Cell className={filterClass(waypoint.doc[0].waypoint.address)} colSpan="3">
+          <small style={{ display: 'grid' }}>
+            <span>{waypoint.doc[0].waypoint.address}</span>
+            {waypoint.doc[0].info_ol && <span className="doc-info-span">инф. ОЛ: {waypoint.doc[0].info_ol}</span>}
+            {waypoint.doc[0].info_driver && <span className="doc-info-span">инф. для водит.: {waypoint.doc[0].info_driver}</span>}
+          </small>
+        </Table.Cell>
+        <Table.Cell>
+          <small>{(waypoint.distance / 1000).toFixed()} ({waypoint.distance > 0 && ((waypoint.distance / waypoint.duration) * 3.6).toFixed()} км/ч)</small>
+        </Table.Cell>
+        <Table.Cell>
+          <small>{`${moment(waypoint.doc[0].delivery_time_s, "HH:mm:ss").format("HH:mm")} - ${moment(waypoint.doc[0].delivery_time_e, "HH:mm:ss").format("HH:mm")}`}</small>
+        </Table.Cell> 
+        <Table.Cell>
+          <small>{pprintSeconds(+waypoint.service_time)} ({`${moment(waypoint.planned_time_s).format("HH:mm")} - ${moment(waypoint.planned_time_e).format("HH:mm")}`})</small>
+        </Table.Cell>
         <Table.Cell 
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
-            this.props.modalShow({ open: true, id: waypoint.id, id1: waypoint.doc.id1, comment: waypoint.comment });
+            this.props.modalShow({ open: true, id: waypoint.id, id1: waypoint.doc[0].id1, comment: waypoint.comment });
           }} 
-          style={{cursor: 'pointer'}} 
+          style={{ cursor: 'pointer' }} 
           textAlign="center">
           <Icon name="edit" color={waypoint.comment ? 'green' : 'black'} title={waypoint.comment ? waypoint.comment : 'Добавить комментарий'} />
-          {/*<Popup*/}
-            {/*trigger={*/}
-              {/*<Icon*/}
-                {/*name="info"*/}
-                {/*style={{ cursor: 'help' }}*/}
-                {/*onMouseDown={(e) => e.preventDefault()}*/}
-              {/*/>*/}
-            {/*}*/}
-            {/*content={waypoint.address}*/}
-            {/*position="right center"*/}
-          {/*/>*/}
+          {/*<Popup
+            trigger={
+              <Icon
+                name="info"
+                style={{ cursor: 'help' }}
+                onMouseDown={(e) => e.preventDefault()} />
+            }
+            content={waypoint.address}
+            position="right center" />*/}
         </Table.Cell>
       </tr>
     ));

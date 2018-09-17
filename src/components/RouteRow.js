@@ -5,7 +5,6 @@ import * as dragTypes from '../constants/dragTypes';
 import { pprintSeconds } from '../utils';
 import moment from 'moment';
 
-
 const routeTarget = {
   canDrop() {
     return false;
@@ -99,7 +98,7 @@ const RouteRow = props => {
       <Th collapsing
         className={getFilterClass('num')}
         onClick={e => ifOpen && props.clickFilter(route.id, 'num', e)}
-        title={ifOpen && titleText.num}>
+        title={ifOpen ? titleText.num : ''}>
         <Checkbox
           onClick={e => e.stopPropagation()}
           onChange={onCheckboxChange}
@@ -122,9 +121,35 @@ const RouteRow = props => {
           {!route.bin && <span className="nowr"><small>{moment(route.created_date).format("HH:mm DD.MM.YYYY")}</small></span>}
         </small>
       </Th>
+      <Th className={getFilterClass('sku')}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'sku', e)}
+          title={ifOpen ? titleText.sku : ''}>
+        <small>SKU: {(+route.sku).toFixed()}</small>
+      </Th>
+      <Th className={getFilterClass('weight')}
+        onClick={e => ifOpen && props.clickFilter(route.id, 'weight', e)}
+        title={ifOpen ? titleText.weight : ''}>
+        <small style={{ display: 'grid' }}>
+          <span>Масса {(+route.weightAll).toFixed()} кг</span>
+          <span className="nowr">{(route.car && (route.car.number || route.car.virtual)) && ((route.weightAll * 100) / route.car.weight).toFixed()+"%"}</span>
+        </small>
+      </Th>
+      <Th className={getFilterClass('volumeAll')}
+        onClick={e => ifOpen && props.clickFilter(route.id, 'volumeAll', e)}
+        title={ifOpen ? titleText.volumeAll : ''}>
+        <small style={{ display: 'grid' }}>
+          <span>Объем {(+route.volumeAll).toFixed(3)} м3</span>
+          <span className="nowr">{(route.car && (route.car.number || route.car.virtual)) && ((route.volumeAll * 100) / route.car.volume).toFixed()+"%"}</span>
+        </small>
+      </Th>
+      <Th className={getFilterClass('pallet')}
+          onClick={e => ifOpen && props.clickFilter(route.id, 'pallet', e)}
+          title={ifOpen ? titleText.pallet : ''}>
+        <small>Паллет {(+route.pallet).toFixed(2)} шт.</small>
+      </Th>
       <Th className={getFilterClass('title')}
           onClick={e => ifOpen && props.clickFilter(route.id, 'title', e)}
-          title={ifOpen && titleText.title}>
+          title={ifOpen ? titleText.title : ''}>
         <small style={{ display: 'grid' }}>
           {!route.bin && <span className="nowr">{route.car && route.car.number}</span>}
           {!route.bin && <span className="nowr">{route.car && route.car.brand}</span>}
@@ -137,38 +162,15 @@ const RouteRow = props => {
       <Th>{!route.bin && <small> Вид оптимизации: <br/> {route.optimize_type} </small>}</Th>
       <Th className={getFilterClass('address')}
           onClick={e => ifOpen && props.clickFilter(route.id, 'address', e)}
-          title={ifOpen && titleText.address}>
-        <small>РНК: {route.countRNK} ТТ: {route.count}</small>
-      </Th>
-      <Th className={getFilterClass('sku')}
-          onClick={e => ifOpen && props.clickFilter(route.id, 'sku', e)}
-          title={ifOpen && titleText.sku}>
-        <small>SKU: {(+route.sku).toFixed()}</small>
-      </Th>
-      <Th className={getFilterClass('weight')}
-        onClick={e => ifOpen && props.clickFilter(route.id, 'weight', e)}
-        title={ifOpen && titleText.weight}>
+          title={ifOpen ? titleText.address : ''}>
         <small style={{ display: 'grid' }}>
-          <span>Масса {(+route.weightAll).toFixed()} кг</span>
-          <span className="nowr">{(route.car && (route.car.number || route.car.virtual)) && ((route.weightAll * 100) / route.car.weight).toFixed()+"%"}</span>
+          <span className="nowr">РНК: {route.countRNK}</span>
+          <span className="nowr">ТТ: {route.count}</span>
         </small>
-      </Th>
-      <Th className={getFilterClass('volumeAll')}
-        onClick={e => ifOpen && props.clickFilter(route.id, 'volumeAll', e)}
-        title={ifOpen && titleText.volumeAll}>
-        <small style={{ display: 'grid' }}>
-          <span>Объем {(+route.volumeAll).toFixed(3)} м3</span>
-          <span className="nowr">{(route.car && (route.car.number || route.car.virtual)) && ((route.volumeAll * 100) / route.car.volume).toFixed()+"%"}</span>
-        </small>
-      </Th>
-      <Th className={getFilterClass('pallet')}
-          onClick={e => ifOpen && props.clickFilter(route.id, 'pallet', e)}
-          title={ifOpen && titleText.pallet}>
-        <small>Паллет {(+route.pallet).toFixed(2)} шт.</small>
       </Th>
       <Th className={getFilterClass('distance')}
           onClick={e => ifOpen && props.clickFilter(route.id, 'distance', e)}
-          title={ifOpen && titleText.distance}>
+          title={ifOpen ? titleText.distance : ''}>
         <small style={{ display: 'grid' }}>
           <span>Километраж: {(route.distance / 1000).toFixed()} км</span>
           {route.index.length !== 0 && <span>До 1 точки: {(route.index[0].distance / 1000).toFixed()} км</span>}

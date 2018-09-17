@@ -174,9 +174,9 @@ class App extends React.Component {
       const value = {
         'hour': moment(time, "HH:mm").get('hour'), 
         'minute': moment(time, "HH:mm").get('minute'),
-        'year': moment(new Date(this.state.startRoute)).get('year'),
-        'month': moment(new Date(this.state.startRoute)).get('month'),
-        'date': moment(new Date(this.state.startRoute)).get('date'),
+        'year': moment(this.state.startRoute).get('year'),
+        'month': moment(this.state.startRoute).get('month'),
+        'date': moment(this.state.startRoute).get('date'),
       };
 
       this.setState({ startRoute: moment().set(value).format(fullTimeFormat) });
@@ -185,10 +185,11 @@ class App extends React.Component {
 
   handleStartRouteDate(event) {
     const time = event.target.value;
+    
     if (moment(time).isValid()) {
       const value = {
-        'hour': moment(new Date(this.state.startRoute)).get('hour'), 
-        'minute': moment(new Date(this.state.startRoute)).get('minute'),
+        'hour': moment(this.state.startRoute, "HH:mm").get('hour'), 
+        'minute': moment(this.state.startRoute, "HH:mm").get('minute'),
         'year': moment(time).get('year'),
         'month': moment(time).get('month'),
         'date': moment(time).get('date'),
@@ -296,6 +297,9 @@ class App extends React.Component {
       cars: !cur.car || acc.cars.includes(cur.car.id) ? acc.cars : [ ...acc.cars, cur.car.id ],
     }), initialOverviewData);
 
+    const optimizeAllRoutes = options => this.props.getLoadingTimeout(() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, options, 'one'));
+    const upload1C = options => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options });
+
     return (
       <div id="page">
         <div id="leftSide" style={{ width: this.props.windowSize.leftWidth }}>
@@ -364,11 +368,11 @@ class App extends React.Component {
                 className="ui basic orange button button-div"
                 text="Загрузить РНК" >
                 <Dropdown.Menu>
-                  <Dropdown.Item text="Все документы" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '1' })} />
-                  <Dropdown.Item text="Документы не в маршрутах" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '2' })} />
-                  <Dropdown.Item text="Не выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '3' })} />
-                  <Dropdown.Item text="Выгружены в 1С" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '4' })} />
-                  <Dropdown.Item text="Документы у сотрудников" onClick={() => this.props.upload1C(this.getFetchParams(), { deliveryDeps, deliveryZones, options: '5' })} />
+                  <Dropdown.Item text="Все документы" onClick={() => upload1C('1')} />
+                  <Dropdown.Item text="Документы не в маршрутах" onClick={() => upload1C('2')} />
+                  <Dropdown.Item text="Не выгружены в 1С" onClick={() => upload1C('3')} />
+                  <Dropdown.Item text="Выгружены в 1С" onClick={() => upload1C('4')} />
+                  <Dropdown.Item text="Документы у сотрудников" onClick={() => upload1C('5')} />
                 </Dropdown.Menu> 
               </Dropdown>
               <Button 
@@ -436,9 +440,9 @@ class App extends React.Component {
                 title="Решить транспортную задачу"
                 icon="play" >
                 <Dropdown.Menu>
-                  <Dropdown.Item text="Закрепленные ТС" onClick={() => this.props.getLoadingTimeout(() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'given', 'one'))} />
-                  <Dropdown.Item text="Минимальные ТС" onClick={() => this.props.getLoadingTimeout(() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'minimal', 'one'))} />
-                  <Dropdown.Item text="Виртуальные ТС" onClick={() => this.props.getLoadingTimeout(() => this.props.optimizeAllRoutes(this.getFetchParams(), checkedRouteIdsArray, 'virtual', 'one'))} />
+                  <Dropdown.Item text="Закрепленные ТС" onClick={() => optimizeAllRoutes('given')} />
+                  <Dropdown.Item text="Минимальные ТС" onClick={() => optimizeAllRoutes('minimal')} />
+                  <Dropdown.Item text="Виртуальные ТС" onClick={() => optimizeAllRoutes('virtual')} />
                 </Dropdown.Menu> 
               </Dropdown>
 
