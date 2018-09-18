@@ -12,12 +12,12 @@ import Overview from '../components/Overview';
 import ModalExtend from '../components/ModalExtend';
 import MoveWindow from '../components/MoveWindow';
 import ModalWaypointEdit from '../components/ModalWaypointEdit';
+import ModalRouteEdit from '../components/ModalRouteEdit';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 
 const { LatLngBounds } = window.google.maps;
 const fullTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
-const defaultTime = moment().hour(8).minutes(0).seconds(0).format(fullTimeFormat);
 
 window.notify = NotificationManager;
 
@@ -37,11 +37,8 @@ class App extends React.Component {
     this.handleWaypointEditShow =    this.handleWaypointEditShow.bind(this);
     this.modalShow =                 this.modalShow.bind(this);
     this.waypointEditShow =          this.waypointEditShow.bind(this);
+    this.routeEditShow =             this.routeEditShow.bind(this);
     this.handleFilterValue =         this.handleFilterValue.bind(this);
-    this.handleSearchDropdown =      this.handleSearchDropdown.bind(this);
-    this.handleStartRouteTime =      this.handleStartRouteTime.bind(this);
-    this.handleStartRouteDate =      this.handleStartRouteDate.bind(this);
-    this.handleStartRouteClear =     this.handleStartRouteClear.bind(this);
     this.handleMapZoom =             this.handleMapZoom.bind(this);
     this.saveWaypoint =              this.saveWaypoint.bind(this);
     this.startLoadingTimer =         this.startLoadingTimer.bind(this);
@@ -56,9 +53,8 @@ class App extends React.Component {
       isLoading: true,
       modalData: {},
       waypointModalData: {},
+      routeModalData: {},
       filterValue: '',
-      searchDropdown: '',
-      startRoute: defaultTime,
       clustered: true,
     };
   }
@@ -157,55 +153,23 @@ class App extends React.Component {
 
     this.setState(prevState => ({ 
       waypointModalData: { 
-        open : !prevState.waypointModalData.open, 
+        open: !prevState.waypointModalData.open, 
         waypoint: find_point(this.props.routes, this.props.activeWaypointId),
       }
     }));
   }
 
+  handleRouteEditShow() {
+    this.setState(prevState => {
+      const open = !prevState.routeModalData.open;
+      open && this.props.fetchCars({ ...this.getFetchParams(true), avail: true });
+
+      return { routeModalData: { open, route: this.props.routes.find(r => this.props.checkedRouteIds[r.id]) } };
+    });
+  }
+
   handleFilterValue(data) {
     this.setState({ filterValue: data.value });
-  }
-
-  handleStartRouteTime(event) {
-    const time = event.target.value;
-
-    if (moment(time, "HH:mm").isValid()) {
-      const value = {
-        'hour': moment(time, "HH:mm").get('hour'), 
-        'minute': moment(time, "HH:mm").get('minute'),
-        'year': moment(this.state.startRoute).get('year'),
-        'month': moment(this.state.startRoute).get('month'),
-        'date': moment(this.state.startRoute).get('date'),
-      };
-
-      this.setState({ startRoute: moment().set(value).format(fullTimeFormat) });
-    }
-  }
-
-  handleStartRouteDate(event) {
-    const time = event.target.value;
-    
-    if (moment(time).isValid()) {
-      const value = {
-        'hour': moment(this.state.startRoute, "HH:mm").get('hour'), 
-        'minute': moment(this.state.startRoute, "HH:mm").get('minute'),
-        'year': moment(time).get('year'),
-        'month': moment(time).get('month'),
-        'date': moment(time).get('date'),
-      };
-
-      this.setState({ startRoute: moment().set(value).format(fullTimeFormat) });
-    }
-  }
-
-  handleStartRouteClear() {
-    this.setState({ startRoute: defaultTime });
-  }
-
-  handleSearchDropdown(event) {
-    const value = event ? event.target.value : '';
-    this.setState({ searchDropdown: value });
   }
 
   modalShow({ open, id, comment, id1 }) {
@@ -217,6 +181,10 @@ class App extends React.Component {
 
   waypointEditShow({ open, waypoint }) {
     this.setState({ waypointModalData: { open, waypoint } });
+  }
+
+  routeEditShow({ open, route }) {
+    this.setState({ routeModalData: { open, route } });
   }
 
   handleMapZoom() {
@@ -307,14 +275,13 @@ class App extends React.Component {
           <Form size="tiny">
             <Form.Group>
               <Form.Select
-                // label="Отделы доставки"
                 placeholder="Базы"
                 value={deliveryDeps}
                 onChange={this.handleDeliveryDepsChange}
                 width={5}
                 options={deliveryDepsOptions}
                 search
-                closeOnChange={true}
+                closeOnChange
                 multiple />
               <Form.Input
                 placeholder="Начало периода"
@@ -355,14 +322,6 @@ class App extends React.Component {
           : null }
           <Form size="tiny">
             <div className="fields nomarginl">
-            {/*<Form.Group>
-              <Form.Button
-                basic
-                color="blue"
-                onClick={() => this.props.optimizeRoutes(this.getFetchParams(), checkedRouteIdsArray)} >
-                {/*<Icon name="road" color="blue" />*/}
-                {/*Оптимизировать
-              </Form.Button>*/}
               <Dropdown 
                 style={{ minWidth: '156px' }}
                 className="ui basic orange button button-div"
@@ -445,122 +404,10 @@ class App extends React.Component {
                   <Dropdown.Item text="Виртуальные ТС" onClick={() => optimizeAllRoutes('virtual')} />
                 </Dropdown.Menu> 
               </Dropdown>
-
-              {/*<Form.Button
-                basic
-                color="yellow"
-                onClick={() => this.props.changeDeps(this.getFetchParams(), deliveryDeps, checkedRouteIdsArray)} >
-                {/*<Icon name="home" color="yellow" />*/}
-                {/*Сменить базу*/}
-              {/*</Form.Button>*/}
-              
-              {/*<Form.Button
-                basic
-                color="green"
-                onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} >
-                {/*<Icon name="table" color="green" />*/}
-                {/*Выгрузить отчет
-              </Form.Button>*/}
               {checkedRouteIdsArray.length !== 0 ? 
               <div className="buttons_row">
                 <Dropdown 
                   className="ui icon basic teal button button-div"
-                  title="Сменить водителя"
-                  icon="drivers license" >
-                  <Dropdown.Menu>
-                    <Input 
-                      onClick={e => e.stopPropagation()} 
-                      onChange={this.handleSearchDropdown} 
-                      value={this.state.searchDropdown} 
-                      icon="search"
-                      placeholder="Водители" 
-                      iconPosition="left"
-                      className="search" />
-                    <Dropdown.Menu scrolling>
-                      {this.props.drivers.length !== 0 
-                        && this.props.drivers.filter(option => option.name.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 )
-                          .map(option => 
-                            (<Dropdown.Item 
-                              key={option.id} 
-                              value={option.id} 
-                              onClick={() => {
-                                this.handleSearchDropdown();
-                                this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, driver: option.id });
-                              }} 
-                              text={option.name} />)
-                          )}
-                    </Dropdown.Menu> 
-                  </Dropdown.Menu> 
-                </Dropdown>
-                <Dropdown 
-                  className="ui icon basic teal button button-div"
-                  title="Сменить ТС"
-                  onClick={() => {
-                    this.handleSearchDropdown();
-                    this.props.fetchCars({ ...this.getFetchParams(true), avail: true });
-                  }}
-                  icon="car" >
-                  <Dropdown.Menu>
-                    <Input 
-                      onClick={e => e.stopPropagation()} 
-                      onChange={this.handleSearchDropdown} 
-                      value={this.state.searchDropdown} 
-                      icon="search"
-                      placeholder="ТС" 
-                      iconPosition="left"
-                      className="search" />
-                    <Dropdown.Menu scrolling>
-                      {this.props.cars.length !== 0 && !this.props.isLoading
-                        && this.props.cars.filter(option => option.brand && option.brand.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 
-                          || option.number && option.number.toLowerCase().indexOf(this.state.searchDropdown.toLowerCase()) !== -1 )
-                          .map(option => 
-                            (<Dropdown.Item 
-                              key={option.id} 
-                              value={option.id} 
-                              onClick={() => {
-                                this.handleSearchDropdown();
-                                this.props.routeEdit({ fetchParams: this.getFetchParams(), pk: checkedRouteIdsArray, car: option.id });
-                              }} 
-                              text={`${option.brand} - ${option.number}`} />)
-                          )}
-                      </Dropdown.Menu>
-                  </Dropdown.Menu> 
-                </Dropdown>
-                <Dropdown
-                  className="ui icon basic teal button button-div"
-                  title="Сменить время начала маршрута"
-                  icon="time">
-                  <Dropdown.Menu className="change-time-div">
-                    <div>
-                      <span>Время отправки</span>
-                      <Input 
-                        onClick={e => e.stopPropagation()} 
-                        className="input-datetime-div" 
-                        onChange={this.handleStartRouteTime}
-                        value={moment(this.state.startRoute).format('HH:mm')}
-                        type="time" />
-                    </div>
-                    <div>
-                      <span>Дата отправки</span>
-                      <Input 
-                        onClick={e => e.stopPropagation()} 
-                        onChange={this.handleStartRouteDate}
-                        value={moment(this.state.startRoute).format('YYYY-MM-DD')}
-                        className="input-datetime-div" 
-                        type="date" />
-                    </div>
-                    <div>
-                      <Button 
-                        color="green"
-                        onClick={() => {
-                          this.handleStartRouteClear();
-                          this.props.routeEdit({ fetchParams: this.getFetchParams(), plannedTimeS: this.state.startRoute, pk: checkedRouteIdsArray });
-                        }} >Принять</Button>
-                    </div>
-                  </Dropdown.Menu>
-                </Dropdown>
-                <Dropdown 
-                  className="ui icon basic violet button button-div"
                   title="Сменить базу"
                   icon="home" >
                   <Dropdown.Menu>
@@ -576,6 +423,12 @@ class App extends React.Component {
                     </Dropdown.Menu>
                   </Dropdown.Menu> 
                 </Dropdown>
+                <Button 
+                  title="Редактировать маршрут"
+                  basic 
+                  color="teal"
+                  icon="edit"
+                  onClick={() => this.handleRouteEditShow()} />
               </div> : null }
               {this.props.activeWaypointId !== null ? 
               <div className="buttons_row">
@@ -675,6 +528,15 @@ class App extends React.Component {
           save={this.saveWaypoint}
           data={this.state.waypointModalData}
           modalShow={this.waypointEditShow} />
+        <ModalRouteEdit
+          isLoading={this.props.isLoading}
+          drivers={this.props.drivers}
+          cars={this.props.cars}
+          dcs={[]}
+          fetchParams={this.getFetchParams}
+          save={this.props.routeEdit}
+          data={this.state.routeModalData}
+          modalShow={this.routeEditShow} />
         <MoveWindow
           data={this.props.moveWindow} />
         <NotificationContainer/>

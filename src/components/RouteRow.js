@@ -117,6 +117,7 @@ const RouteRow = props => {
         <small style={{ display: 'grid' }}>
           {/*{route.collectionRem && "Непопавшие РНК "}*/}
           {!route.bin && <span className="nowr">на {moment(route.delivery_date).format("DD.MM.YYYY")}</span>}
+          {route.title && <span className="nowr">({route.title})</span>}
           {route.id1 && <span className="nowr">{route.id1 + ( route.id ? " (" + route.id + ")" : "" )}</span>}
           {!route.bin && <span className="nowr"><small>{moment(route.created_date).format("HH:mm DD.MM.YYYY")}</small></span>}
         </small>

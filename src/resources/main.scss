@@ -128,27 +128,6 @@ button, .button-div {
 .buttons_row {
   display: inherit;
 }
-.change-time-div {
-  padding: 10px!important;
-  min-width: 300px!important;
-}
-.change-time-div > div:not(:last-child) {
-  margin-bottom: 5px!important;
-  min-height: 40px;
-}
-.change-time-div button {
-  float: right;
-  margin: 0!important;
-}
-.change-time-div span {
-  line-height: 35px!important;
-  float: left;
-  color: #000;
-}
-.input-datetime-div {
-  float: right;
-  width: 160px;
-}
 
 .waypoint-edit-modal {
   height: 95vh!important;
@@ -177,10 +156,27 @@ button, .button-div {
   float: right;
 }
 
+.route-edit-modal {
+  height: 75vh!important;
+  width: 50vw!important;
+  margin-left: -26%!important;
+}
+
+.route-edit-modal .actions {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 65px;
+}
+
 .bottom-side {
   bottom: 0;
   position: absolute;
   width: 100%;
+}
+
+.active.loader {
+  z-index: 1001;
 }
 
 
