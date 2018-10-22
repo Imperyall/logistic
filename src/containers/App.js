@@ -34,6 +34,7 @@ class App extends React.Component {
     this.getFetchParams =            this.getFetchParams.bind(this);
     this.handleMapLoad =             this.handleMapLoad.bind(this);
     this.handleModalShow =           this.handleModalShow.bind(this);
+    this.handleNewRouteNumber =      this.handleNewRouteNumber.bind(this);
     this.handleWaypointEditShow =    this.handleWaypointEditShow.bind(this);
     this.modalShow =                 this.modalShow.bind(this);
     this.waypointEditShow =          this.waypointEditShow.bind(this);
@@ -52,6 +53,7 @@ class App extends React.Component {
       recycled: false,
       isLoading: true,
       modalData: {},
+      newRouteNumber: '',
       waypointModalData: {},
       routeModalData: {},
       filterValue: '',
@@ -166,6 +168,10 @@ class App extends React.Component {
 
       return { routeModalData: { open, route: this.props.routes.find(r => this.props.checkedRouteIds[r.id]) } };
     });
+  }
+
+  handleNewRouteNumber(event) {
+    this.setState({ newRouteNumber: event ? event.target.value : '' });
   }
 
   handleFilterValue(data) {
@@ -334,12 +340,35 @@ class App extends React.Component {
                   <Dropdown.Item text="Документы у сотрудников" onClick={() => upload1C('5')} />
                 </Dropdown.Menu> 
               </Dropdown>
-              <Button 
-                title="Новый"
-                basic 
-                color="green"
-                icon="plus"
-                onClick={() => this.props.newRoutes(this.getFetchParams())} />
+              <Dropdown 
+                className="ui basic icon green button button-div"
+                title="Добавить маршрут"
+                icon="level down" >
+                <Dropdown.Menu className="dropdown-add-route">
+                  <Dropdown.Item text="Создать пустой" onClick={() => this.props.newRoutes(this.getFetchParams())} />
+                  <Dropdown.Item>
+                  {
+                    <div className="dropdown-add-route-line">
+                      <Input 
+                        maxLength="5"
+                        onChange={this.handleNewRouteNumber}
+                        value={this.state.newRouteNumber}
+                        onClick={e => e.stopPropagation()} 
+                        size="small" />
+                      <Button 
+                        title={`Загрузить маршрут № ${this.state.newRouteNumber}`}
+                        disabled={this.state.newRouteNumber == ''}
+                        icon="chevron down"
+                        color="green"
+                        onClick={() => {
+                          this.props.addRoutes(this.getFetchParams(), this.state.newRouteNumber);
+                          this.handleNewRouteNumber();
+                        }} />
+                    </div>
+                  }
+                  </Dropdown.Item>
+                </Dropdown.Menu> 
+              </Dropdown>
               <Button 
                 title="Принять для 1C"
                 basic 
@@ -382,12 +411,12 @@ class App extends React.Component {
                 color="red"
                 icon="recycle"
                 onClick={() => this.props.unrecycleRoutes(this.getFetchParams(), checkedRouteIdsArray)} />
-              <Button 
+              { /*<Button 
                 title="Выгрузить отчет"
                 basic 
                 color="green"
                 icon="file excel outline"
-                onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} />
+                onClick={() => this.props.uploadXls(this.getFetchParams(), checkedRouteIdsArray)} />*/}
               <Button 
                 title="Оптимизировать маршруты"
                 basic 

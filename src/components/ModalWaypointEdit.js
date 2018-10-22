@@ -47,15 +47,15 @@ class ModalWaypointEdit extends React.Component {
     if (open != this.props.data.open && !open) {
       let { waypoint } = this.props.data;
 
-      waypoint = waypoint 
+      waypoint = waypoint && waypoint.doc.length
         ? { 
-          ...waypoint.doc.waypoint,  
+          ...waypoint.doc[0].waypoint,  
           pk: waypoint.id,
           service_time: waypoint.service_time,
-          volume: waypoint.doc.volume,
-          weight: waypoint.doc.weight,
-          doc_delivery_time_s: waypoint.doc.delivery_time_s,
-          doc_delivery_time_e: waypoint.doc.delivery_time_e,
+          volume: waypoint.doc[0].volume,
+          weight: waypoint.doc[0].weight,
+          doc_delivery_time_s: waypoint.doc[0].delivery_time_s,
+          doc_delivery_time_e: waypoint.doc[0].delivery_time_e,
         } : null;
 
       this.handleWaypoint(waypoint);

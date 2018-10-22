@@ -162,6 +162,10 @@ button, .button-div {
   margin-left: -26%!important;
 }
 
+.route-edit-modal .content {
+  margin: 0;
+}
+
 .route-edit-modal .actions {
   position: absolute;
   bottom: 0;
@@ -177,6 +181,15 @@ button, .button-div {
 
 .active.loader {
   z-index: 1001;
+}
+
+.dropdown-add-route {
+  width: 150px;
+}
+
+.dropdown-add-route-line {
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 

@@ -113,11 +113,11 @@ export const optimizeAllRoutes = (fetchParams, pk, opts, bases) => dispatch => {
     });
 };
 
-export const addRoutes = fetchParams => dispatch => {
+export const addRoutes = (fetchParams, num) => dispatch => {
   const eventId = getRandomString();
   dispatch(beginLoading({ add: eventId }));
 
-  return axios.get(`${BASE_URL}/routes/add/`)
+  return axios.get(`${BASE_URL}/routes/add/`, { params: { num } })
     .then(res => {
       logging('addRoutes', res);
       
