@@ -87,7 +87,10 @@ class Waypoint extends React.Component {
           onMouseEnter={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: rowId, r_text: rowTitle }); }}
           onMouseLeave={() => { if (this.props.ifMoveWaypoint) this.props.handleWindowRoute({ r_id: 0, r_text: null }); }} >
         <Table.Cell>
-          <small>{waypoint.num}</small>
+          <small style={{ display: 'grid' }}>
+            {waypoint.num}
+            {waypoint.doc[0].waypoint.group && <span><Icon name="grid layout" color="red" /></span>}
+          </small>
         </Table.Cell>
         <Table.Cell className={filterClass(waypoint.doc[0].id1)}>
           <small style={{ display: 'grid' }}>{waypoint.doc.map((doc, index) => (<span key={`id1${index}`}>{doc.id1}</span>))}</small>
@@ -107,7 +110,10 @@ class Waypoint extends React.Component {
         <small style={{ display: 'grid' }}>{waypoint.doc.map((doc, index) => (<span key={`pallet${index}`}>{(+doc.pallet).toFixed(2)}</span>))}</small>
         </Table.Cell>
         <Table.Cell className={filterClass(waypoint.doc[0].waypoint.title)}>
-          <small>{waypoint.doc[0].waypoint.title}</small>
+          <small style={{ display: 'grid' }}>
+            <span>{waypoint.doc[0].waypoint.title}</span>
+            {waypoint.doc[0].waypoint.group && <span>({waypoint.doc[0].waypoint.group})</span>}
+          </small>
         </Table.Cell>
         <Table.Cell className={filterClass(waypoint.doc[0].delivery_dep)}>
           <small>{waypoint.doc[0].delivery_dep}</small>

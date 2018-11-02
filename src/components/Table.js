@@ -64,16 +64,17 @@ class RouteTable extends React.Component {
           indexes = indexes.sort((a,b) => {
             let cur = a, next = b;
             
-            if (["id1", "sku", "weight", "volumeAll", "pallet"].indexOf(thSort) !== -1) {
-              cur = a.doc; next = b.doc;
-            } else if (["title", "address"].indexOf(thSort) !== -1) {
-              cur = a.doc.waypoint; next = b.doc.waypoint;
+            if (["id1", "sku", "weight", "volumeAll", "pallet"].includes(thSort)) {
+              cur = a.doc[0]; next = b.doc[0];
+            } else if (["title", "address"].includes(thSort)) {
+              cur = a.doc[0].waypoint; next = b.doc[0].waypoint;
             }
 
-            if (["num", "sku", "weight", "volumeAll", "pallet", "distance"].indexOf(thSort) === -1) {
-              if (cur[thSort] > next[thSort]) return order * -1; else
-              if (cur[thSort] < next[thSort]) return order * 1;  else
-              if (cur[thSort] === next[thSort]) return 0;
+            if (!["num", "sku", "weight", "volumeAll", "pallet", "distance"].includes(thSort)) {
+              return cur[thSort] > next[thSort] ? order * -1 : (cur[thSort] < next[thSort] ? order * 1 : 0);
+              // if (cur[thSort] > next[thSort]) return order * -1; else
+              // if (cur[thSort] < next[thSort]) return order * 1;  else
+              // if (cur[thSort] === next[thSort]) return 0;
             } else {
               return order * (+next[thSort] - +cur[thSort]);
             }
@@ -81,7 +82,7 @@ class RouteTable extends React.Component {
         }
 
         indexes = indexes.map((waypoint, index2) => {
-          const active = Array.isArray(this.props.activeWaypointId) ? this.props.activeWaypointId.indexOf(waypoint.id) !== -1 : false;
+          const active = Array.isArray(this.props.activeWaypointId) ? this.props.activeWaypointId.includes(waypoint.id) : false;
 
           return (
             <WaypointRow
