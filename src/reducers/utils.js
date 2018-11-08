@@ -2,6 +2,7 @@ import {
 	FETCH_DELIVERY_DEPS_SUCCESS,
   FETCH_DELIVERY_ZONES_SUCCESS,
   FETCH_CARS,
+  FETCH_DCS,
   FETCH_DRIVERS,
 	BEGIN_LOADING,
 	CHANGE_BLOCKS_SIZE,
@@ -18,6 +19,7 @@ const DEFAULT_STATE = {
   deliveryZones: [],
   drivers: [],
   cars: [],
+  dcs: [],
   isLoading: [],
   loadingTimeout: 0,
   loadingCurrent: 0,
@@ -46,6 +48,13 @@ export default function utils(state = DEFAULT_STATE, action) {
       return {
         ...state,
         cars: action.payload,
+      };
+    }
+
+    case FETCH_DCS: {
+      return {
+        ...state,
+        dcs: action.payload,
       };
     }
 

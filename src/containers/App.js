@@ -164,7 +164,10 @@ class App extends React.Component {
   handleRouteEditShow() {
     this.setState(prevState => {
       const open = !prevState.routeModalData.open;
-      open && this.props.fetchCars({ ...this.getFetchParams(true), avail: true });
+      if (open) {
+        this.props.fetchCars({ ...this.getFetchParams(true), avail: true });
+        this.props.fetchDcs();
+      }
 
       return { routeModalData: { open, route: this.props.routes.find(r => this.props.checkedRouteIds[r.id]) } };
     });
@@ -561,7 +564,7 @@ class App extends React.Component {
           isLoading={this.props.isLoading}
           drivers={this.props.drivers}
           cars={this.props.cars}
-          dcs={[]}
+          dcs={this.props.dcs}
           fetchParams={this.getFetchParams}
           save={this.props.routeEdit}
           data={this.state.routeModalData}
@@ -579,6 +582,7 @@ App.propTypes = {
   fetchDrivers:      PropTypes.func,
   fetchRoutes:       PropTypes.func,
   fetchCars:         PropTypes.func,
+  fetchDcs:          PropTypes.func,
   fetchDeliveryZones:PropTypes.func,
   getDeliveryZones:  PropTypes.func,
   bounds:            PropTypes.object,
@@ -590,6 +594,7 @@ App.propTypes = {
   checkedRouteIds:   PropTypes.object,
   deliveryDeps:      PropTypes.array,
   cars:              PropTypes.array,
+  dcs:               PropTypes.array,
   drivers:           PropTypes.array,
   deliveryZones:     PropTypes.array,
   windowSize:        PropTypes.object,
@@ -645,6 +650,7 @@ const mapStateToProps = state => ({
     markers:          state.points.markers,
     moveWindow:       state.moveWin,
     cars:             state.utils.cars,
+    dcs:              state.utils.dcs,
     drivers:          state.utils.drivers,
     zoom:             state.utils.zoom,
     loadingTimeout:   state.utils.loadingTimeout,

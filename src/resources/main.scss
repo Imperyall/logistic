@@ -164,6 +164,8 @@ button, .button-div {
 
 .route-edit-modal .content {
   margin: 0;
+  height: 59vh;
+  overflow-y: auto;
 }
 
 .route-edit-modal .actions {

@@ -4,6 +4,7 @@ import {
   FETCH_DELIVERY_DEPS_SUCCESS,
   FETCH_DELIVERY_ZONES_SUCCESS,
   FETCH_CARS,
+  FETCH_DCS,
   FETCH_DRIVERS,
   MOVE_WAYPOINT,
   TOGGLE_OPEN_ROUTE,
@@ -268,19 +269,19 @@ export const fetchCars = ({ delivery_dep, avail }) => dispatch => {
     }).finally(() => dispatch(beginLoading({ end: eventId })));
 };
 
-// export const fetchDcs = () => dispatch => {
-//   const eventId = getRandomString();
-//   dispatch(beginLoading({ add: eventId }));
+export const fetchDcs = () => dispatch => {
+  const eventId = getRandomString();
+  dispatch(beginLoading({ add: eventId }));
 
-//   return axios.get(`${BASE_URL}/mon/cars/`, { params: { delivery_dep, avail } })
-//     .then(res => {
-//       logging('fetchCars', res);
+  return axios.get(`${BASE_URL}/dc/get/`)
+    .then(res => {
+      logging('fetchDcs', res);
       
-//       dispatch({ type: FETCH_DCS, payload: res.data });
-//     }).catch(res => {
-//       logging('error', res);
-//     }).finally(() => dispatch(beginLoading({ end: eventId })));
-// };
+      dispatch({ type: FETCH_DCS, payload: res.data });
+    }).catch(res => {
+      logging('error', res);
+    }).finally(() => dispatch(beginLoading({ end: eventId })));
+};
 
 export const fetchDrivers = () => dispatch => {
   const eventId = getRandomString();
@@ -316,11 +317,11 @@ export const fetchDeliveryZones = params => dispatch => {
   }
 };
 
-export const routeEdit = ({ fetchParams, deliveryDeps, pk, car, driver, title, plannedTimeS }) => dispatch => {
+export const routeEdit = ({ fetchParams, deliveryDeps, pk, car, dc, driver, title, plannedTimeS }) => dispatch => {
   const eventId = getRandomString();
   dispatch(beginLoading({ add: eventId }));
 
-  return axios.get(`${BASE_URL}/routes/edit/`, { params: { deliveryDeps, pk, car, driver, title, plannedTimeS } })
+  return axios.get(`${BASE_URL}/routes/edit/`, { params: { deliveryDeps, pk, car, dc, driver, title, plannedTimeS } })
     .then(res => {
       logging('routeEdit', res);
       

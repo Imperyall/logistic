@@ -44,6 +44,7 @@ class ModalRouteEdit extends React.Component {
         ? [ this.props.drivers.find(d => d.name == route.driver).id ] 
         : [],
       car: route.car && route.car.id ? [ route.car.id ] : [],
+      dc: route.dc ? [ route.dc ] : [],
       startDate: moment(new Date(route.planned_time_s)).format("YYYY-MM-DD"),
       startTime: moment(new Date(route.planned_time_s)).format("HH:mm"),
     } : clearState);
@@ -55,15 +56,15 @@ class ModalRouteEdit extends React.Component {
     const name = target.name;
 
     this.setState(prevState => ({ 
-      [name]: Array.isArray(value) 
-        ? value.filter(item => !prevState[name].includes(item)) 
-        : value 
+      [name]: Array.isArray(value)
+        ? value.filter(item => !prevState[name].includes(item))
+        : value
     }));
   }
 
   saveData() {
     const { data, fetchParams } = this.props;
-    const { title, driver, car, startDate, startTime } = this.state;
+    const { title, driver, car, dc, startDate, startTime } = this.state;
 
     const start = `${startDate}T${startTime}:00`;
 
@@ -72,6 +73,7 @@ class ModalRouteEdit extends React.Component {
       pk: [data.route.id],
       title,
       car: car[0],
+      dc: dc[0],
       driver: driver[0],
       plannedTimeS: moment(start).format('YYYY-MM-DDTHH:mm:ss'),
     });
@@ -89,7 +91,7 @@ class ModalRouteEdit extends React.Component {
     const { title, driver, car, startDate, startTime, dc } = this.state;
 
     const driversOptions = drivers.map(d => ({ text: d.name, value: d.id })) || [];
-    const dcOptions = dcs.map(d => ({ text: d.title, value: d.id1 })) || [];
+    const dcOptions = dcs.map(d => ({ text: d.title, value: d.pk })) || [];
     const carsOptions = cars.map(c => ({ text: `${c.brand} - ${c.number}`, value: c.id })) || [];
 
     return (
